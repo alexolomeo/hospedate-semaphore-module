@@ -1,0 +1,7 @@
+[semaphore-server]
+controller ansible_host=semaphore.hospedatebolivia.com
+
+[semaphore-server:vars]
+ansible_user=awx-build
+ansible_become=yes
+ansible_python_interpreter=/usr/bin/python3
