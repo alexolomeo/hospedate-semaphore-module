@@ -1,7 +1,7 @@
-[semaphore-server]
+[semaphore_server]
 semaphore.hospedatebolivia.com
 
-[semaphore-server:vars]
+[semaphore_server:vars]
 ansible_user=build-user
 ansible_become=yes
 ansible_python_interpreter=/usr/bin/python3

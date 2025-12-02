@@ -1,6 +1,6 @@
 ---
 - name: frontend production build and deploy
-  hosts: semaphore-server 
+  hosts: semaphore_server 
   vars:
     hospedate_group_security: hospedate  
   roles:
