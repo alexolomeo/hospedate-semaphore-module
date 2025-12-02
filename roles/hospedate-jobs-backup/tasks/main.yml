@@ -1,0 +1,22 @@
+---
+
+- name: "Backup DB Gazella  Encode "
+  ansible.builtin.include_tasks: backup-encode.yml
+  when: hospedate_mode == 'backup-encode'    
+
+- name: "Backup DB Gazella Encrypt"
+  ansible.builtin.include_tasks: backup-encrypt.yml
+  when: hospedate_mode == 'backup-encrypt'    
+
+- name: "Backup DB GazellaCOM"
+  ansible.builtin.include_tasks: backup.yml
+  when: hospedate_mode == 'backup'    
+
+- name: "Copy From Production"
+  ansible.builtin.include_tasks: copyfromprod.yml
+  when: hospedate_mode == 'copyfromprod'    
+
+- name: "Lista Backup files"
+  ansible.builtin.include_tasks: listbackup.yml
+  when: hospedate_mode == 'listbackup'    
+

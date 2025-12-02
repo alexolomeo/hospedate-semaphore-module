@@ -1,0 +1,37 @@
+---
+
+- name: frontend production encode
+  hosts: semaphore-server 
+  vars:
+    hospedate_group_security: swisstech  
+  roles:
+    - role: gazella-jobs-backup
+      hospedate_mode: backup-encode    
+      hospedate_project: frontend                                # client
+      hospedate_app: com                                      # com , erp
+      hospedate_environment: production                      # integration, production
+      hospedate_db_local_name: syscomdb
+
+- name: frontend production encrypt
+  hosts: gazellacom-production
+  vars:
+    hospedate_group_security: swisstech  
+  roles:
+    - role: hospedate-jobs-backup
+      hospedate_mode: backup-encrypt                 #backup, copyfromprod, restore, cleandb
+      hospedate_project: frontend                       # client
+      hospedate_app: com                             # com , erp
+      hospedate_environment: production             #integration, production
+      hospedate_db_local_host: frontend-syscom-prod.citzwq60niow.us-east-1.rds.amazonaws.com
+      hospedate_db_local_name: syscomdb
+      hospedate_db_local_port: 5432 
+      hospedate_db_local_username: "{{ db_username}}"
+      hospedate_db_local_password: "{{ db_password }}"
+      hospedate_db_local_username_main: "{{ db_username_main }}"
+      hospedate_db_local_password_main: "{{ db_password_main }}"
+      hospedate_db_encrypt_pass: "{{ db_key_decrypt }}"
+      hospedate_db_restore_node: 10
+      hospedate_db_local_retention: 1                         
+      hospedate_db_local_exclude: "{{ db_local_exclude }}"          # --exclude-table-data 'audit.*' 
+      hospedate_db_retentioo_day: 30                                # days
+

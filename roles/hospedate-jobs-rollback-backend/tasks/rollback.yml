@@ -1,0 +1,53 @@
+---
+  
+- name: "ROLLBACK DEFAULT - Build app from rollback default."
+  block:
+
+    - name: "ROLLBACK DEFAULT DEPLOY - Get default rollback build "
+      become: yes
+      ansible.builtin.shell: "ls {{ gazella_remote_workdir }}  | sort -k 5 | awk '{print $1}' | tail -2 | head -1 |  grep -oE '[0-9]+([.][0-9]+)?'"
+      register: gazella_number_build_read
+
+    - debug: msg="{{gazella_number_build_read.stdout}}"
+
+    - name: "OLLBACK DEFAULT DEPLOY - Rollback variable gazella_number_build_read = {{ gazella_number_build_read }}"
+      set_fact: gazella_number_build={{ gazella_number_build_read.stdout }}
+
+  when: gazella_rollback_build_number == 0
+
+- name: "ROLLBACK CUSTOM - Build app from custom rollback."
+  block:
+
+    - debug: msg="{{gazella_rollback_build_number}}"
+
+    - name: "ROLLBACK CUSTOM DEPLOY - Rollback custom variable gazella_number_build = {{ gazella_rollback_build_number }}"
+      set_fact: gazella_number_build={{ gazella_rollback_build_number }}
+
+  when: gazella_rollback_build_number != 0
+
+- name: "ROLLBBACK - Deploy application as a systemd service on target system."
+  become: yes
+  ansible.builtin.shell: bash /opt/jboss/bin/jboss-cli.sh --connect --command="undeploy *.war" || true
+
+- name: "ROLLBBACK - Stop service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: wildfly
+
+- name: "ROLLBBACK - Remove all deploy file from wildfly."
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/deployments/*
+
+- name: "ROLLBBACK - Remove all termporal files from wildfly."
+  become: yes
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/tmp
+
+- name: "ROLLBBACK - Deploy new package "
+  ansible.builtin.shell: "cp {{ gazella_remote_workdir }}//{{ gazella_project }}_{{ gazella_environment}}_build_{{ gazella_number_build }}/*.war /opt/jboss/standalone/deployments"
+
+- name: "ROLLBBACK - Start service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: started
+    name: wildfly
+

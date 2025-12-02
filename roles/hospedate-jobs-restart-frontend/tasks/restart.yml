@@ -1,0 +1,14 @@
+---
+  
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Stop service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: wildfly
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Start service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: started
+    name: wildfly
+

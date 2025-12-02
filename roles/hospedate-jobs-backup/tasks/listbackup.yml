@@ -1,0 +1,14 @@
+---
+  
+- name: "LIST BACKUP - list  from backup ."
+  block:
+
+    - name: "BACKUP LIST PACKAGE - List to  backup files "
+      become: yes
+      ansible.builtin.shell: "ls {{ hospedate_local_workdir }}/backup | sort -k {{ hospedate_limit }} "
+      register: hospedate_list_backup_read
+
+    - name: BACKUP LIST PACKAGE - Print return information from the previous task
+      ansible.builtin.debug:
+        var: hospedate_list_backup_read.stdout_lines
+        verbosity: 2

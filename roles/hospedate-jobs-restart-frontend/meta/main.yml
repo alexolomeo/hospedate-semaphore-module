@@ -1,0 +1,24 @@
+galaxy_info:
+  role_name: hospedate-jobs-restart-frontend
+  namespace: middleware_automation
+  author: Alexander Aguilar Torrico
+  description: Hospedate frontend restart ...
+  company: BolivianDevs.
+
+  license: Apache License 2.0
+
+  min_ansible_version: "2.9"
+
+  platforms:
+   - name: EL
+     versions:
+     - 8
+     - 9
+
+  galaxy_tags:
+    - amazon ami
+    - redhat
+    - rhel
+    - tools
+    - application
+    - java

@@ -1,0 +1,26 @@
+---
+  
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Deploy application as a systemd service on target system."
+  become: yes
+  ansible.builtin.shell: bash /opt/jboss/bin/jboss-cli.sh --connect --command="undeploy *.war" || true
+    
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Stop service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: wildfly
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Remove all undeploy file from wildfly."
+  become: yes
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/deployments/*.undeployed      
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Remove all termporal files from wildfly."
+  become: yes
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/tmp
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Start service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: started
+    name: wildfly
+

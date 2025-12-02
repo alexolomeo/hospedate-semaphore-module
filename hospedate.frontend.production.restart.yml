@@ -1,0 +1,10 @@
+---
+- name: frontend production restart
+  hosts: hospedate-com-production
+  vars:
+    hospedate_group_security: swisstech  
+  roles:
+    - role: gazella-jobs-restart-com
+      hospedate_mode: restart                           # restart. restart-clean
+      hospedate_project: frontend                          # client
+      hospedate_environment: production                # integration, production

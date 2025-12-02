@@ -1,0 +1,14 @@
+---
+  
+- name: "LIST PACKAGE - list  from rollback ."
+  block:
+
+    - name: "ROLLBACK LIST PACKAGE - List to  rollback build "
+      become: yes
+      ansible.builtin.shell: "ls {{ gazella_remote_workdir }} | sort -k {{ gazella_limit }} "
+      register: gazella_list_build_read
+
+    - name: ROLLBACK LIST PACKAGE - Print return information from the previous task
+      ansible.builtin.debug:
+        var: gazella_list_build_read.stdout_lines
+        verbosity: 2

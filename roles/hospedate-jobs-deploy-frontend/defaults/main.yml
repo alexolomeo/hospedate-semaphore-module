@@ -1,0 +1,25 @@
+---
+
+hospedate_mode: 
+hospedate_project:                                         # client
+hospedate_environment: integration                         #integration, production
+hospedate_build_profile_customer: null
+hospedate_build_profile_environment: integration
+hospedate_build_user: semaphore-build
+hospedate_build_group: "{{ hospedate_group_security }}"
+hospedate_build_workspace: '/opt/workspace'
+hospedate_build_workdir: "{{ hospedate_build_workspace }}/{{  hospedate_project }}/{{ hospedate_project }}-deploy-{{ hospedate_environment }}"
+hospedate_build_sequence: "{{ hospedate_build_workspace }}/{{  hospedate_project }}/{{ hospedate_project }}-sequence-{{ hospedate_environment }}"
+hospedate_build_sequence_file: "{{ hospedate_build_sequence }}/sequence.ini"
+
+hospedate_build_repo_url: git@github.com:alexolomeo/hospedate-frontend.git
+hospedate_build_repo_branch: QA/STAGIN   #QA
+hospedate_build_repo_filter: master
+#hospedate_java_package_version: 'java-8'
+#hospedate_java_home: '/usr/lib64/jvm/jdk1.8.0_202'
+hospedate_java_package_version: 22
+hospedate_java_home: node
+
+hospedate_remote_user: semaphore-user
+hospedate_remote_group: "{{ hospedate_group_security }}"
+hospedate_remote_workdir: '/opt/.awx/deployments'

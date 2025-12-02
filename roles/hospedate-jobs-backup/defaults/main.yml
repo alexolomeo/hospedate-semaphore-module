@@ -1,0 +1,38 @@
+---
+
+hospedate_mode:                                #backup, copyfromprod, restore, cleandb
+hospedate_project: client                      # client
+hospedate_app:                                 # gazella-com , gazella-erp
+hospedate_environment: integration             #integration, production
+hospedate_db_remote_host: 
+hospedate_db_remote_name:
+hospedate_db_remote_port: 5432
+hospedate_db_remote_username: "{{ db_username_remote }}"
+hospedate_db_remote_password: "{{ db_password_remote }}"
+hospedate_db_local_host: 
+hospedate_db_local_name:
+hospedate_db_local_port: 5432
+hospedate_db_local_username: "{{ db_username}}"
+hospedate_db_local_password: "{{ db_password }}"
+hospedate_db_local_username_main: "{{ db_username_main }}"
+hospedate_db_local_password_main: "{{ db_password_main }}"
+hospedate_db_encrypt_pass: "{{ db_key_decrypt }}"
+hospedate_local_base: '/opt/.awx/db'
+hospedate_local_workdir: "{{ hospedate_local_base }}/{{ hospedate_environment }}"
+hospedate_remote_workdir: "{{ hospedate_local_base }}/remote"
+hospedate_awx_user:  awx-user
+hospedate_awx_group:  "{{ hospedate_group_security }}"
+hospedate_db_restore_node: 10
+hospedate_db_local_retention: 1
+hospedate_limit: 10
+hospedate_db_retentioo_day: 30                                # days
+
+hospedate_db_remote_exclude: "{{ db_remote_exclude }}"        # --exclude-table-data 'audit.*' 
+hospedate_db_local_exclude: "{{ db_local_exclude }}"          # --exclude-table-data 'audit.*' 
+
+hospedate_encode_user: awx-build
+hospedate_encode_group: "{{ hospedate_group_security }}"
+hospedate_encode_workspace: '/opt/encode/awx/secure'
+hospedate_encode_workdir: "{{ hospedate_encode_workspace }}/{{  hospedate_project }}/{{ hospedate_project }}-encode-{{ hospedate_environment }}"
+
+hospedate_update_password_enable: enable

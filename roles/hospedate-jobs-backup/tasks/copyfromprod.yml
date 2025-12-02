@@ -1,0 +1,141 @@
+---
+
+- name: "Copy from Prod  {{ hospedate_project }} - {{ hospedate_environment }} "
+  block:
+
+    - name: Print message if ansible version is greater than 2.7.0
+      debug:
+        msg: "Ansible version is  {{ ansible_version.full }}"
+
+    - name: Get timestamp from the system
+      shell: "date +%Y%m%d-%H%M"
+      register: tstamp
+
+    - name: Set variables
+      set_fact:
+       my_date: "{{ tstamp.stdout[0:8]}}"
+       my_time: "{{ tstamp.stdout[8:]}}"
+
+    - name: "Base folder to AWX exists: {{ hospedate_local_workdir }}"
+      become: yes
+      ansible.builtin.file:
+        path: "{{ hospedate_local_base }}"
+        state: directory
+        owner: "{{ hospedate_awx_user }}"
+        group: "{{ hospedate_awx_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "Remote directory workdir exists: {{ hospedate_local_workdir }}/remote"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_local_workdir }}/remote"
+        state: directory
+        owner: "{{ hospedate_awx_user }}"
+        group: "{{ hospedate_awx_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "log directory workdir exists: {{ hospedate_local_workdir }}/log"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_local_workdir }}/log"
+        state: directory
+        owner: "{{ hospedate_awx_user }}"
+        group: "{{ hospedate_awx_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "bin directory workdir exists: {{ hospedate_local_workdir }}/bin"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_local_workdir }}/bin"
+        state: directory
+        owner: "{{ hospedate_awx_user }}"
+        group: "{{ hospedate_awx_group }}"
+        mode: 0775
+        force: yes
+
+    - name: Install - Copy the gazella-restore script
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.template:
+        src: gazella-restore.j2
+        dest: "{{ hospedate_local_workdir }}/bin/gazella-restore"
+        owner: "{{ hospedate_awx_user }}"
+        group: "{{ hospedate_awx_group }}"
+        force: yes
+        mode: 0775
+
+    - name: "Closed all applicatioonn PSQL, PG_RESTORE and PG_DUMP"
+      become: yes
+      ansible.builtin.shell: "killall psql; killall pg_restore ; killall pg_dump "
+      ignore_errors: yes
+
+    - name: "Stop service wildfly"
+      become: yes
+      ansible.builtin.systemd_service:
+        state: stopped
+        name: wildfly
+
+    - name: "Start get backup from production"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_remote_password }} ; pg_dump -h {{ hospedate_db_remote_host }} -p {{ hospedate_db_remote_port }} -U {{ hospedate_db_remote_username }} {{ hospedate_db_remote_exclude }}  -Fc  {{ hospedate_db_remote_name }} >  {{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time }}.bkp "
+      args:
+        chdir: "{{ hospedate_local_workdir }}/remote"
+
+    - name: "Clean all connection"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  template1 -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname =  '{{ hospedate_db_local_name }}' \" "
+
+    - name: "Drop database from integration"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username }}  template1 -c \"DROP DATABASE  {{ hospedate_db_local_name }} \" "
+      ignore_errors: yes
+
+    - name: "Create Database on integration"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  template1 -c \"CREATE DATABASE {{ hospedate_db_local_name }} \" "
+
+    - name: "Grant Database on integration"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  template1 -c \"GRANT ALL PRIVILEGES ON DATABASE {{ hospedate_db_local_name }} TO {{ hospedate_db_local_username }}  \" "
+
+    - name: "Set Owner Database on integration"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  template1 -c \"ALTER DATABASE {{ hospedate_db_local_name }} OWNER TO {{ hospedate_db_local_username }} \" "
+
+    - name: "Previus settinng  Database on integration"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  template1 -c \"{{ hospedate_db_previus_command }} \" "
+      ignore_errors: yes
+
+    - name: "Start RESTORING for backup"
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "{{ hospedate_local_workdir }}/bin/gazella-restore {{ hospedate_db_local_username }} {{ hospedate_db_local_password }} {{ hospedate_db_local_name }} {{ hospedate_db_local_host }} {{ hospedate_local_workdir }}/remote/{{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time }}.bkp {{ hospedate_local_workdir }}/remote/{{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time }}.log"
+      args:
+        chdir: "{{ hospedate_local_workdir }}/bin"
+      ignore_errors: yes
+
+    - name: "Finish backup "
+      become_user: "{{ hospedate_awx_user }}"
+      ansible.builtin.shell: "echo '{{ my_date }}{{ my_time }} [RESTORING] Creating restoring form backup {{ hospedate_local_workdir }}/remote/{{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time}}.bkp from the database {{ hospedate_db_local_name }}' >> {{ hospedate_local_workdir }}/log/copyfromprod.log"
+
+    - name: "Update  Password for Com Aplication "
+      block:
+
+        - name: "Update Password"
+          ansible.builtin.include_tasks: update_password.yml
+          
+        - name: "Insert SQL update from {{ hospedate_local_workdir }}/update_password/update_password-{{ my_date }}-{{ my_time }}.sql"
+          become_user: "{{ hospedate_awx_user }}"
+          ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password_main }} ; psql -h {{ hospedate_db_local_host }} -p {{ hospedate_db_local_port }}  -U {{ hospedate_db_local_username_main }}  {{ hospedate_db_local_name }}  < {{ hospedate_local_workdir }}/update_password/update_password-{{ my_date }}-{{ my_time }}.sql "
+          ignore_errors: yes
+
+      when: hospedate_update_password_enable == 'enable'
+
+    - name: "Start service wildfly"
+      become: yes
+      ansible.builtin.systemd_service:
+        state: started
+        name: wildfly
+

@@ -1,0 +1,9 @@
+---
+
+- name: "Deploy new package on wildfly"
+  ansible.builtin.include_tasks: rollback.yml
+  when: gazella_mode == 'rollback'    
+
+- name: "List of deploy package build"
+  ansible.builtin.include_tasks: listdeploy.yml
+  when: gazella_mode == 'listbuild'

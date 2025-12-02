@@ -1,0 +1,11 @@
+---
+
+hospedate_mode: 
+hospedate_project:                                         # client
+hospedate_app:                                             # gazella-com gazella-erp
+hospedate_environment: integration                         #integration, production
+hospedate_local_user: hospedate-user
+hospedate_local_group: "{{ hospedate_group_security }}"
+
+
+  

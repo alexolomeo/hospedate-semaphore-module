@@ -1,0 +1,21 @@
+---
+
+- name: hospedate production backup
+  hosts: hospedate-production
+#  become: true
+  vars:
+    hospedate_group_security: hoospedate
+  roles:
+    - role: hospedate-jobs-backup
+      hospedate_mode: backup                         #backup, copyfromprod, restore, cleandb
+      hospedate_project: frontend                       # client
+      hospedate_environment: production             #integration, production
+      hospedate_db_local_host: hoospedate-syscom-prod.citzwq60niow.us-east-1.rds.amazonaws.com                          
+      hospedate_db_local_name: hospedatedb
+      hospedate_db_local_port: 5432      
+      hospedate_db_local_username: "{{ db_username }}"                         
+      hospedate_db_local_password: "{{ db_password }}"               
+      hospedate_db_local_retention: 10                          
+      hospedate_db_local_exclude: "{{ db_local_exclude }}"          # --exclude-table-data 'audit.*' 
+
+

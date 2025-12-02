@@ -1,0 +1,30 @@
+---
+  
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Deploy application as a systemd service on target system."
+  become: yes
+  ansible.builtin.shell: bash /opt/jboss/bin/jboss-cli.sh --connect --command="undeploy *.war" || true
+    
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Stop service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: wildfly
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Remove all deploy file from wildfly."
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/deployments/*
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Remove all termporal files from wildfly."
+  become: yes
+  ansible.builtin.shell: rm -rf /opt/jboss/standalone/tmp
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Deploy new package "
+  ansible.builtin.shell: "cp {{ hospedate_remote_workdir }}/{{ hospedate_project }}_{{ hospedate_environment }}_build_{{ hospedate_number_build }}/*.war /opt/jboss/standalone/deployments"
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Start service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: started
+    name: wildfly
+
+#- name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Verify that deployment is functional."
+#  ansible.builtin.include_tasks: validate_deployment.yml

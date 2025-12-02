@@ -1,0 +1,88 @@
+---
+- name: "Preoare to encode"
+  block:
+
+    - name: "Get timestamp from the system"
+      shell: "date +%Y%m%d%H%M"
+      register: tstamp
+
+    - name: "Set variables"
+      set_fact:
+       my_year: "{{ tstamp.stdout[0:4]}}"
+       my_months: "{{ tstamp.stdout[4:6]}}"
+       my_date: "{{ tstamp.stdout[0:8]}}"
+       my_time: "{{ tstamp.stdout[8:]}}"
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Ensure app workdir exists: {{ hospedate_encode_workdir }}"
+      become: yes
+      ansible.builtin.file:
+        path: "{{ hospedate_encode_workdir }}"
+        state: directory
+        owner: "{{ hospedate_encode_user }}"
+        group: "{{ hospedate_encode_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Encode directory workdir exists: {{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+      become_user: "{{ hospedate_encode_user }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+        state: directory
+        owner: "{{ hospedate_encode_user }}"
+        group: "{{ hospedate_encode_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Create encode file from openssl {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem "
+      become_user: "{{ hospedate_encode_user }}"
+      ansible.builtin.shell: "openssl req -x509 -nodes -days 1000000 -newkey rsa:4096 -keyout {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.pem -subj \"/C=US/ST=Illinois/L=Chicago/O=IT/CN=www.example.com\" -out {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.pub"
+      args:
+        chdir: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Prepare encode file {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem "
+      become_user: "{{ hospedate_encode_user }}"
+      ansible.builtin.shell: "cp {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.pem {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem"
+      args:
+        chdir: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Vault encrypt file {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem "
+      become_user: "{{ hospedate_encode_user }}"
+      ansible.builtin.shell: "echo '{{ hospedate_db_encrypt_pass }}' > {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.text ; ansible-vault encrypt {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem --vault-password-file={{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.text"
+      args:
+        chdir: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+
+    - name: AWX BUILD SERVER - PREPARE ENCODE - Delete successfully fetched files
+      file:
+        path: buffer-encrypt/
+        state: absent
+
+    - name: "AWX BUILD SERVER - PREPARE PACKAGE - Create compress file build_{{ hospedate_number_build }}.tar.gz "
+      ansible.builtin.shell: "tar -zcvf {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.tar.gz {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.pub {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.encrypt.pem"
+      args:
+        chdir: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}"
+
+    - name: "AWX BUILD SERVER - PREPARE ENCODE - Fetch the file from controller server {{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.pub"
+      run_once: yes
+      fetch: 
+        src: "{{ hospedate_encode_workdir }}/{{ my_year }}/{{ my_months }}/{{ hospedate_db_local_name }}-{{ my_date }}-{{ my_time }}.tar.gz"
+        dest: buffer-encrypt/ 
+        flat: yes
+
+    - name: AWX BUILD SERVER - PREPARE ENCODE - Set to delegate variable from controller to COM-INTEGRATION
+      set_fact:
+        hospedate_date: "{{ my_date }}"
+        hospedate_time: "{{ my_time }}"
+      delegate_facts: yes
+      delegate_to: com-integration
+      when: hospedate_environment == 'integration'
+
+    - name: AWX BUILD SERVER - PREPARE ENCODE - Set to delegate variable from controller to COM-PRODUCTION
+      set_fact:
+        hospedate_date: "{{ my_date }}"
+        hospedate_time: "{{ my_time }}"
+      delegate_facts: yes
+      delegate_to: com-production
+      when: hospedate_environment == 'production'
+
+  when: inventory_hostname == 'controller'
+

@@ -1,0 +1,38 @@
+---
+- name: "push file to remote host {{ hospedate_project }} {{ hospedate_environment }}"
+  block:
+
+    - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER - PUSH PACKAGE - Checking hospedate_number_build from tranfer_push.yml"
+      debug:
+        msg: "hospedate_number_build is {{ hospedate_number_build }}"
+
+    - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER - Create remote directory exists: {{ hospedate_remote_workdir }}"
+      become_user: "{{ hospedate_remote_user }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_remote_workdir }}"
+        state: directory
+        owner: "{{ hospedate_remote_user }}"
+        group: "{{ hospedate_remote_group }}"
+        mode: 0775
+        force: yes
+
+    - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER - Copy the file from master to gazellacom"
+      ansible.builtin.copy: 
+        src: "buffer/{{ hospedate_project }}_{{ hospedate_environment }}_build_{{ hospedate_number_build }}.tar.gz"
+        dest: "{{ hospedate_remote_workdir }}/{{ hospedate_project }}_{{ hospedate_environment }}_build_{{ hospedate_number_build }}.tar.gz"
+          
+    - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER - Unarchive deploy: {{ hospedate_remote_workdir }}"
+      ansible.builtin.unarchive:
+        src: "{{ hospedate_remote_workdir }}/{{ hospedate_project }}_{{ hospedate_environment }}_build_{{ hospedate_number_build }}.tar.gz"
+        dest: "{{ hospedate_remote_workdir }}"
+        remote_src: yes
+
+    - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER - Delete compress {{ hospedate_remote_workdir }}/build_{{ hospedate_number_build }}.tar.gz"
+      ansible.builtin.file:
+        path: "{{ hospedate_remote_workdir }}/{{ hospedate_project }}_{{ hospedate_environment }}_build_{{ hospedate_number_build }}.tar.gz"
+        state: absent
+      ignore_errors: yes
+
+  when: ( inventory_hostname == 'com-integration') or ( inventory_hostname == 'com-production')
+
+

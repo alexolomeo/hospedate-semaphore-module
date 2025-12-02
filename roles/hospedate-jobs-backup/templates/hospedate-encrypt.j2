@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Swisstech.solutions
+# autor: alexander.aguilar@swisstech.solutions
+#
+# #######################
+# Postgresql database backup script.
+# - this runs out of the postgres user's crontab
+# - this runs once per day
+# - this takes a database name as the first argument
+# - this compresses the dump with bzip2 compression
+# - this encrypts the dump with aes 256 and  
+#  
+# To extract:
+# You need the private key associated with the
+# public key defined by the backup_public_key variable.
+#
+#   ansible-vault decrypt private.pem.encrypt
+#
+#   openssl smime -decrypt -in my_database.bkp.bz2.enc -binary -inform DEM -inkey private.pem | bzcat >  my_database.bkp
+#
+# #######################
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+#Username for owner
+BACKUP_DBUSERNAME=$1
+#Password for username
+BACKUP_DBUSERPASS=$2
+
+##DATABASE ##
+BACKUP_DB=$3
+BACKUP_DBHOST=$4
+OUTPUT_DB=$5
+OUTPUT_KEY=$6
+BACKUP_EXCLUDE=$7
+
+BACKUP_PORT='{{ gazella_db_local_port }}'
+BACKUP_RETENTION='{{ gazella_db_retentioo_day }}'
+BACKUP_PATH='{{ gazella_local_workdir }}'
+
+
+BACKUPDATE="$(date +'%Y%m%d-%H%M')"
+
+##
+## Prepare  backup tp encrypt
+##
+
+if [ -z $BACKUP_DBUSERNAME ]
+then
+ echo "Please specify a database name as the first argument"
+ exit 1
+fi
+
+# String to append to the name of the backup files
+backup_date=`date +%Y-%m-%d-%H-%M-%S`
+echo "$backup_date - Dumping $BACKUP_DBUSERNAME to $OUTPUT_DB.bkp.bz2.enc"
+
+export PGPASSWORD=$BACKUP_DBUSERPASS
+
+pg_dump --host $BACKUP_DBHOST --port $BACKUP_PORT  -U $BACKUP_DBUSERNAME $BACKUP_EXCLUDE -Fc  $BACKUP_DB | bzip2 | openssl smime -encrypt -aes256 -binary -outform DEM  -out $OUTPUT_DB.bz2.enc  $OUTPUT_KEY
+
+
+#find $BACKUP_PATH -type f -prune -mtime \
+#    +$BACKUP_RETENTION -exec rm -f {} \;
+

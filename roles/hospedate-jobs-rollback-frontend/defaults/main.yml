@@ -1,0 +1,23 @@
+---
+
+gazella_mode: rollback                  # rollback, listbuild, listbuildurl, mixed
+gazella_project: client                  # client
+gazella_environment: integration        # integration, production
+gazella_remote_workdir: '/opt/.awx/deployments'
+gazella_method: static                  # static, url, mixed
+gazella_method_url: null                # aws, digitalocean
+gazella_rollback_build_number: 0        # value numeric , 0 is a default
+gazella_remote_workdir: '/opt/.awx/deployments'
+gazella_remote_user: awx-user
+gazella_remote_group: "{{ gazella_group_security }}"
+gazella_limit: 10
+
+gazella_build_workspace: '/opt/workspace'
+gazella_build_workdir: "{{ gazella_build_workspace }}/{{  gazella_project }}/{{ gazella_project }}-deploy-{{ gazella_environment }}"
+gazella_build_sequence: "{{ gazella_build_workspace }}/{{  gazella_project }}/{{ gazella_project }}-sequence-{{ gazella_environment }}"
+gazella_build_sequence_file: "{{ gazella_build_sequence }}/sequence.ini"
+gazella_build_user: awx-build
+gazella_build_group: "{{ gazella_group_security }}"
+
+
+
