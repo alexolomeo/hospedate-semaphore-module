@@ -2,14 +2,15 @@
   
 - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Deploy application Lambda Container."
   become: yes
-  ansible.builtin.shell: aws lambda update-function-code --function-name {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }} --image-uri 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }}
- || true
+  ansible.builtin.shell: aws lambda update-function-code --function-name hospedate-ssr-v6 --image-uri 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }} || true
+  #ansible.builtin.shell: aws lambda update-function-code --function-name {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }} --image-uri 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }} || true
     
 - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Updating AWS Lambda Container."
   ansible.builtin.shell: sleep 20
 
 - name: "{{ hospedate_project|upper }} {{ hospedate_environment|upper }} SERVER DEPLOY - Review status deploy and update."
   become: yes
-  ansible.builtin.shell: aws lambda get-function --function-name {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }} --query 'Configuration.LastUpdateStatus'
+  ansible.builtin.shell: aws lambda get-function --function-name hospedate-ssr-v6 --query 'Configuration.LastUpdateStatus'
+  #ansible.builtin.shell: aws lambda get-function --function-name {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }} --query 'Configuration.LastUpdateStatus'
 
 
