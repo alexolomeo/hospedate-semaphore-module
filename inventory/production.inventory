@@ -1,7 +1,9 @@
 [semaphore_server]
-semaphore.hospedatebolivia.com
+3.150.251.26
 
 [semaphore_server:vars]
-ansible_user=build-user
+ansible_user=semaphore-build
 ansible_become=yes
 ansible_python_interpreter=/usr/bin/python3
+#ansible_ssh_private_key_file=/ruta/a/tu/clave_privada/id_rsa
+

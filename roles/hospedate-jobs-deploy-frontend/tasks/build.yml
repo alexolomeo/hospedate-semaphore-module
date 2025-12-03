@@ -1,6 +1,6 @@
 ---
 
-- name: "Build app from {{ hospedate_build_repo_url }} on '{{ hospedate_builder_repo_branch }}'."
+- name: "Build app from {{ hospedate_build_repo_url }} on '{{ hospedate_build_repo_branch }}'."
   block:
 
     - name: "NODE BUILD SERVER - Ensure app sequences exists: {{ hospedate_build_sequence }}"

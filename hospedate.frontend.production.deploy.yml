@@ -6,6 +6,7 @@
   roles:
     - role: hospedate-jobs-deploy-frontend
       hospedate_mode: build
+      hospedate_number_version: v1
       hospedate_project: frontend                            # client
       hospedate_environment: production                      # integration, production
       hospedate_build_profile_customer: frontend             # 
