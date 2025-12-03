@@ -8,6 +8,10 @@
   ansible.builtin.include_tasks: prepare.yml
   when: hospedate_mode == 'build'    
 
+- name: "Deploy to AWS S3"
+  ansible.builtin.include_tasks: deploy_s3.yml
+  when: hospedate_mode == 'build'    
+
 - name: "Deploy new package on AWS"
   ansible.builtin.include_tasks: deploy.yml
   when: hospedate_mode == 'build'    
