@@ -4,9 +4,9 @@
   ansible.builtin.include_tasks: build.yml
   when: hospedate_mode == 'build'    
 
-#- name: "Prepare application to tranfer"
-#  ansible.builtin.include_tasks: prepare.yml
-#  when: hospedate_mode == 'build'    
+- name: "Prepare application to tranfer"
+  ansible.builtin.include_tasks: prepare.yml
+  when: hospedate_mode == 'build'    
 
 #- name: "Deploy new package on AWS"
 #  ansible.builtin.include_tasks: deploy.yml
