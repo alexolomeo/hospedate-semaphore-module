@@ -19,8 +19,8 @@
       debug:
         msg: "hostname is {{ inventory_hostname }}"
 
-    - name: "NODE BUILD SERVER - PREPARE IMAGE - Create Tag for {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }}"
-      ansible.builtin.shell: "docker tag {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:latest 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }} " 
+    - name: "NODE BUILD SERVER - PREPARE IMAGE - Create Tag for {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}{{ my_time }}"
+      ansible.builtin.shell: "docker tag {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:latest 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}{{ my_time }} " 
       args:
         chdir: "{{ hospedate_build_workdir }}"
 
@@ -30,7 +30,7 @@
         chdir: "{{ hospedate_build_workdir }}"
 
     - name: "NODE BUILD SERVER - PREPARE IMAGE - Push Docker image to AWS ECR"
-      ansible.builtin.shell: "docker push 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}-{{ my_time }}" 
+      ansible.builtin.shell: "docker push 590169045949.dkr.ecr.us-east-2.amazonaws.com/{{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}:{{ my_date }}{{ my_time }}" 
       args:
         chdir: "{{ hospedate_build_workdir }}"
 
