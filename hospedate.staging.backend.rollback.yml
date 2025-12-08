@@ -1,0 +1,18 @@
+---
+
+- name: frontend production rollback
+  hosts: hospedate-com-production
+#  become: true
+  vars:
+    hospedate_group_security: hospedaje
+  roles:
+    - role: hospedate-jobs-rollback-frontend
+      hospedate_mode: rollback                  # rollback, listbuild, listbuildurl, mixed
+      hospedate_project: frontend                  # client
+      hospedate_environment: production        # integration, production
+      hospedate_method: static                  # static, url, mixed
+      hospedate_method_url: null                # aws, digitalocean
+      hospedate_rollback_build_number: 0        # value numeric , 0 is a default
+      hospedate_unify_activate: no            # yes, no
+      hospedate_unify_path: /opt/.gazellacom   # path for unify all configuration
+

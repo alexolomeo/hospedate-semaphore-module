@@ -1,0 +1,10 @@
+---
+
+- name: frontend production rollback
+  hosts: hospedate-com-production
+#  become: true
+  roles:
+    - role: hospedate-jobs-rollback-com
+      hospedate_mode: listbuild                 # rollback, listbuild, listbuildurl, mixed
+      hospedate_limit: 10
+      hospedate_remote_workdir: '/opt/.awx/deployments'

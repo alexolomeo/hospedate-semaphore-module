@@ -1,0 +1,18 @@
+---
+- name: frontend staging build and deploy
+  hosts: semaphore_server 
+  vars:
+    hospedate_group_security: hospedate  
+  roles:
+    - role: hospedate-jobs-deploy-frontend
+      hospedate_mode: build
+      hospedate_number_version: v1
+      hospedate_project: frontend                            # client
+      hospedate_environment: staging                      # integration, production
+      hospedate_build_profile_customer: frontend             # 
+      hospedate_build_profile_environment: staging        # image-produccion
+      hospedate_build_repo_url: git@github.com:alexolomeo/hospedate-frontend.git 
+      hospedate_build_repo_branch: STAGING
+      hospedate_build_repo_filter: STAGING
+      hospedate_target: aws            # aws, local
+
