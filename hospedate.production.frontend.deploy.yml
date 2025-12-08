@@ -14,5 +14,6 @@
       hospedate_build_repo_url: git@github.com:alexolomeo/hospedate-frontend.git 
       hospedate_build_repo_branch: master
       hospedate_build_repo_filter: master
+      hospedate_bucket: cloudfront-hospedate-prod            # 
       hospedate_target: aws            # aws, local
 

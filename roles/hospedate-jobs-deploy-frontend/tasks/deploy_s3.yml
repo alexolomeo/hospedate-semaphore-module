@@ -30,7 +30,7 @@
         chdir: "{{ hospedate_build_workdir }}"
 
     - name: "DEPLOY S3 FRONTEND - Upload images from local directory export to Amazon S3"
-      ansible.builtin.shell: "aws s3 sync export/s3 s3://cloudfront-hospedate-prod/ --delete" 
+      ansible.builtin.shell: "aws s3 sync export/s3 s3://{{ hospedate_bucket }}/ --delete" 
       args:
         chdir: "{{ hospedate_build_workdir }}"
 
