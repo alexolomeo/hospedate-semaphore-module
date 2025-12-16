@@ -1,9 +1,9 @@
 ---
 
-- name: "Build app from {{ hospedate_build_repo_url }} on '{{ hospedate_builder_repo_branch }}'."
+- name: "Build app from {{ hospedate_build_repo_url }} on '{{ hospedate_build_repo_branch }}'."
   block:
 
-    - name: "AWX BUILD SERVER - Ensure app sequences exists: {{ hospedate_build_sequence }}"
+    - name: "NODE BUILD SERVER - Ensure app sequences exists: {{ hospedate_build_sequence }}"
       ansible.builtin.file:
         path: "{{ hospedate_build_sequence }}"
         state: directory
@@ -12,7 +12,7 @@
         mode: 0775
         force: yes
 
-    - name: "AWX BUILD SERVER - Touch if dont exist {{ hospedate_build_sequence_file }}"
+    - name: "NODE BUILD SERVER - Touch if dont exist {{ hospedate_build_sequence_file }}"
       ansible.builtin.file:
         path: "{{ hospedate_build_sequence_file }}"
         state: touch
@@ -20,34 +20,34 @@
         modification_time: preserve
         access_time: preserve
 
-    - name: AWX BUILD SERVER - Print message if ansible version is greater than 2.7.0
+    - name: NODE BUILD SERVER - Print message if ansible version is greater than 2.7.0
       debug:
         msg: "Ansible version is  {{ ansible_version.full }}"
 
-    - name: "AWX BUILD SERVER - Read file and put variable from {{ hospedate_build_sequence_file }} "
+    - name: "NODE BUILD SERVER - Read file and put variable from {{ hospedate_build_sequence_file }} "
       ansible.builtin.command: "cat {{ hospedate_build_sequence_file }}"
       ignore_errors: true
       changed_when: false
       register: hospedate_number_build_read
       become: yes
 
-    - name: "AWX BUILD SERVER - Set global variable hospedate_number_build"
+    - name: "NODE BUILD SERVER - Set global variable hospedate_number_build"
       ansible.builtin.set_fact:
         hospedate_number_build: "{{ hospedate_number_build_read.stdout }}"
 
-    - name: "AWX BUILD SERVER - Increment variable hospedate_number_build = {{ hospedate_number_build | int + 1 }}"
+    - name: "NODE BUILD SERVER - Increment variable hospedate_number_build = {{ hospedate_number_build | int + 1 }}"
       ansible.builtin.set_fact: 
         hospedate_number_build={{ hospedate_number_build | int + 1 }}
 
-    - name: "AWX BUILD SERVER - set sequence file {{ hospedate_build_sequence_file }} to {{ hospedate_number_build }}"
+    - name: "NODE BUILD SERVER - set sequence file {{ hospedate_build_sequence_file }} to {{ hospedate_number_build }}"
       ansible.builtin.shell: "echo {{ hospedate_number_build }} > {{ hospedate_build_sequence_file }}"
 
-    - name: "AWX BUILD SERVER - Delete previous workdir {{ hospedate_build_workdir }}."
+    - name: "NODE BUILD SERVER - Delete previous workdir {{ hospedate_build_workdir }}."
       ansible.builtin.file:
         path: "{{ hospedate_build_workdir }}"
         state: absent
 
-    - name: "AWX BUILD SERVER - Ensure app workdir exists: {{ hospedate_build_workdir }}"
+    - name: "NODE BUILD SERVER - Ensure app workdir exists: {{ hospedate_build_workdir }}"
       ansible.builtin.file:
         path: "{{ hospedate_build_workdir }}"
         state: directory
@@ -56,14 +56,14 @@
         mode: 0775
         force: yes
 
-    - name: "AWX BUILD SERVER - Bitbucket Checkout the application source code Gazella COM"
+    - name: "NODE BUILD SERVER - Github Checkout the application source code Hospedate COM"
       ansible.builtin.git:
         repo: "{{ hospedate_build_repo_url }}"
         dest: "{{ hospedate_build_workdir }}"
         version: "{{ hospedate_build_repo_branch }}"
       ignore_errors: yes  
 
-    - name: "AWX BUILD SERVER - Bitbucket Recursively change ownership"
+    - name: "NODE BUILD SERVER - Github Recursively change ownership"
       become: yes
       file:
         path: "{{ hospedate_build_workdir}}"
@@ -72,22 +72,20 @@
         owner: "{{ hospedate_build_user }}"
         group: "{{ hospedate_build_group }}"
 
-    - name: "AWX BUILD SERVER - Git fix trusted directory"
+    - name: "NODE BUILD SERVER - Git fix trusted directory"
       ansible.builtin.command: "git config --global --add safe.directory {{ hospedate_build_workdir }}"
       args:
         chdir: "{{ hospedate_build_workdir }}"
 
-    - name: "AWX BUILD SERVER - Build the App using Maven"
-      ansible.builtin.command: "mvn -X -s customer/{{ hospedate_build_profile_customer }}/settings.xml clean package -Dbuild.number={{ hospedate_number_build }} -P{{ hospedate_build_profile_environment }}"
-      register: mvn_build
-      environment:
-        JAVA_HOME: "{{ hospedate_java_home }}"
+    - name: "NODE BUILD SERVER - Build the App using Node"
+      ansible.builtin.command: "docker build -t {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }} . "
+      register: node_build
       args:
         chdir: "{{ hospedate_build_workdir }}"
       changed_when: false
 
-    - name: "AWX BUILD SERVER - Display build application log"
+    - name: "NODE BUILD SERVER - Display build application log"
       ansible.builtin.debug:
-        var: mvn_build.stdout
+        var: node_build.stdout
 #      when:
 #        - display_mvn_output is defined

@@ -1,0 +1,48 @@
+---
+- name: "Preoare to Deploy"
+  block:
+
+    - name: DEPLOY S3 FRONTEND - PREPARE S3 UPLOAP - Checking hospedate_number_build
+      debug:
+        msg: "hospedate_number_build is {{ hospedate_number_build }}"
+
+    - name: DEPLOY S3 FRONTEND - PREPARE S# UPLOAP - Checking inventory_hostname
+      debug:
+        msg: "hostname is {{ inventory_hostname }}"
+
+    - name: "DEPLOY S3 FRONTEND - Create directory to export static images"
+      become: yes
+      file:
+        path: "{{ hospedate_build_workdir}}/export"
+        state: directory
+        recurse: yes
+        owner: "{{ hospedate_build_user }}"
+        group: "{{ hospedate_build_group }}"
+
+    - name: "DEPLOY S3 FRONTEND - Create a container temporal {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal"
+      ansible.builtin.shell: "docker run -d --name {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }} " 
+      args:
+        chdir: "{{ hospedate_build_workdir }}"
+
+    - name: "DEPLOY S3 FRONTEND - Copy resource static images from frontend image to local"
+      ansible.builtin.shell: "docker cp {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal:/var/task/export/s3 ./export" 
+      args:
+        chdir: "{{ hospedate_build_workdir }}"
+
+    - name: "DEPLOY S3 FRONTEND - Upload images from local directory export to Amazon S3"
+      ansible.builtin.shell: "aws s3 sync export/s3 s3://{{ hospedate_bucket }}/ --delete" 
+      args:
+        chdir: "{{ hospedate_build_workdir }}"
+
+    - name: "DEPLOY S3 FRONTEND - Stpp Container {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal"
+      ansible.builtin.shell: "docker stop {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal" 
+      args:
+        chdir: "{{ hospedate_build_workdir }}"
+
+
+    - name: "DEPLOY S3 FRONTEND - Remove Container {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal"
+      ansible.builtin.shell: "docker rm {{ hospedate_build_profile_customer }}-{{ hospedate_build_profile_environment }}-{{ hospedate_number_version }}-temporal" 
+      args:
+        chdir: "{{ hospedate_build_workdir }}"
+
+
