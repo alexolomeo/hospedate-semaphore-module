@@ -16,6 +16,7 @@
     state: directory
     owner: "{{ hospedate_user }}"
     group: "{{ hospedate_group_security }}"
+    mode: '0755'  
     force: no
 
 - name: "BUCKET - Bucket log to historial on server controller"
