@@ -19,20 +19,19 @@
     mode: '0755'  
     force: no
 
-- name: "BUCKET - Bucket log to historial on server controller"
+- name: "BUCKET - Bucket history log on server controller"
   become: yes
   ansible.builtin.shell: echo " {{ my_date }}{{ my_time }} - {{ hospedate_environment }} - BUCKET INIT SYNC  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
 
 - name: "BUCKET - Sync Bucket from {{ hospedate_bucket_origin }} to {{ hospedate_bucket_target }}"
   become: yes
-  ansible.builtin.shell: "/usr/local/bin/aws s3 ls {{ hospedate_bucket_origin }}"
+  ansible.builtin.shell: "/usr/local/bin/aws s3 sync {{ hospedate_bucket_origin }} {{ hospedate_bucket_target }}  --exact-timestamps --acl bucket-owner-full-control"
   register: s3_sync
   changed_when: false
   args:
     chdir: "/opt"
-#ansible.builtin.shell: "/usr/local/bin/aws s3 sync {{ hospedate_bucket_origin }} {{ hospedate_bucket_target }}"
 
-- name: BUCKET - Guardar output del sync en archivo
+- name: "BUCKET - Output sync on file {{ hospedate_logdir }}/bucket-sync-output-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.log"
   ansible.builtin.copy:
     content: |
       ===== STDOUT =====

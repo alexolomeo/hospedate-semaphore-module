@@ -10,6 +10,6 @@
       hospedate_project: hospedate                       # client
       hospedate_environment: staging             #staging, production
       hospedate_bucket_origin: s3://hospedate-prod-app/
-      hospedate_bucket_target: null
+      hospedate_bucket_target: s3://hospedate-staging-app/
       hospedate_logdir: /var/log/semaphore
 
