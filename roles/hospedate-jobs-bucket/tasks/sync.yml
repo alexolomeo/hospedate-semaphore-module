@@ -21,7 +21,7 @@
 
 - name: "BUCKET - Bucket log to historial on server controller"
   become: yes
-  ansible.builtin.shell: echo " {{ my_date }}{{ my_time }} - BUCKET INIT SYNC  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync-.log
+  ansible.builtin.shell: echo " {{ my_date }}{{ my_time }} - {{ hospedate_environment }} - BUCKET INIT SYNC  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
 
 - name: "BUCKET - Sync Bucket from {{ hospedate_bucket_origin }} to {{ hospedate_bucket_target }}"
   become: yes
