@@ -6,6 +6,7 @@
   roles:
     - role: hospedate-jobs-bucket
       hospedate_mode: sync                         #backup, copyfromprod, restore, cleandb
+      hospedate_user: semaphore-user
       hospedate_project: hospedate                       # client
       hospedate_environment: staging             #staging, production
       hospedate_bucket_origin: s3://hospedate-prod-app/

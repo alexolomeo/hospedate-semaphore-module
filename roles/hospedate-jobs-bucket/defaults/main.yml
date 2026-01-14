@@ -3,7 +3,7 @@
 hospedate_mode: sync                           
 hospedate_project: hospedate                    # client
 hospedate_environment: staging                  # develop, staging, production
-hospedate_user: hospedate
+hospedate_user: semaphore-user
 hospedate_group_security: "{{ hospedate_group_security }}"
 hospedate_bucket: null 
 hospedate_bucket_origin: null
