@@ -1,0 +1,36 @@
+server {
+    listen 80; # managed by Certbot
+    server_name env-staging.hospedatebolivia.com;
+    client_max_body_size 100M;
+    access_log /var/log/nginx/backend-production_access.log;
+    error_log  /var/log/nginx/backend-production_error.log warn;
+
+    
+    # Serve static files directly from Nginx (faster)
+    location /static/ {
+        alias /home/hospedate/hospedate-backend/staticfiles/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        gzip on;
+        gzip_types text/css application/javascript image/svg+xml;
+    }
+
+    # Proxy API requests to Django
+    location / {
+
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+	proxy_set_header Authorization $http_authorization;  # Asegura la cabecera Authorization
+
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+
+
+    }
+}
+

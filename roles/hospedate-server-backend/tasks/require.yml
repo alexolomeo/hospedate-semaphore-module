@@ -1,0 +1,34 @@
+---
+
+- name: Update
+  ansible.builtin.apt:  
+    update_cache: yes
+    force_apt_get: yes
+    cache_valid_time: 3600
+
+- name: Upgrade
+  ansible.builtin.apt:  
+    name: "*"
+    state: latest
+    update_cache: true
+    cache_valid_time: 3600
+
+
+- name: Install required Develop Tools
+  ansible.builtin.apt:
+    name: "{{ hospedate_required_dev }}"
+    state: present
+    update_cache: "{{ hospedate_apt_update_cache }}"
+    cache_valid_time: "{{ hospedate_apt_cache_valid_time }}"
+  tags:
+    - hospedate_required_dev
+
+- name: Install required Basic tools (GIT, Python-pip, python-setup)
+  ansible.builtin.apt:
+    name: "{{ hospedate_required_tools }}"
+    state: present
+    update_cache: "{{ hospedate_apt_update_cache }}"
+    cache_valid_time: "{{ hospedate_apt_cache_valid_time }}"
+  tags:
+    - hospedate_required_tools
+

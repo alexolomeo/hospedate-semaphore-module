@@ -1,0 +1,10 @@
+[program:hospedate-celery-email]
+command=/home/hospedate/hospedate-backend/venv/bin/celery -A config worker -Q email.high,email.standard,email.low -n worker_email --concurrency=2 --prefetch-multiplier=1 --loglevel=info
+directory=/home/hospedate/hospedate-backend
+user=hospedate
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/hospedate/hospedate-backend/logs/celery-email.log
+environment=DJANGO_ENV="production",DJANGO_SETTINGS_MODULE="config.django.production",GOOGLE_APPLICATION_CREDENTIALS="/etc/gcp/firebase-sa.json",GOOGLE_CLOUD_PROJECT="hospedate-production",GOOGLE_CLOUD_QUOTA_PROJECT="hospedate-production",AWS_REGION="us-east-2"
+

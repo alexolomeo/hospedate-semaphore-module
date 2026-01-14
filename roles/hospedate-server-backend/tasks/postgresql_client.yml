@@ -1,0 +1,23 @@
+---
+
+
+- name: "PostgreSQL Client - Add repository Postgreesql Project {{ gazellaerp_postgresql_version }}"
+  become: yes 
+  ansible.builtin.shell: 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+  args:
+    executable: /bin/sh
+
+- name: "PostgreSQL Client - Add KEY GPG for repository Postgresql {{ gazellaerp_postgresql_version }}"
+  become: yes
+  ansible.builtin.shell: "wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/postgresql.asc > /dev/null"
+
+- name: "PostgreSQL Client - Update  repository PostgreSQL {{ gazellaerp_postgresql_version }}"
+  become: yes
+  ansible.builtin.shell: "sudo apt update"
+
+- name: "PostgreSQL Client - Install PostgreSQL Client {{ gazellaerp_postgresql_version }}"
+  ansible.builtin.apt:
+    name: "postgresql-client-{{ gazellaerp_postgresql_version }}"
+    state: present
+  tags:
+    - gazellaerp_required_dev

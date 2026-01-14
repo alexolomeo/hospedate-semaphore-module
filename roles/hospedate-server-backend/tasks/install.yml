@@ -1,0 +1,243 @@
+---
+
+- name: Install - Add Hospedate system group security
+  ansible.builtin.group:
+    name: "{{ hospedate_group_security }}"
+    state: present
+  tags:
+    - hospedate_user
+
+- name: Add Hospedate system user
+  ansible.builtin.user:
+    name: "{{ hospedate_user }}"
+    group: "{{ hospedate_group_security }}"
+    shell: "{{ hospedate_user_shell }}"
+    password: "{{ hospedate_user_passwd }}"
+    update_password: "{{ hospedate_user_update_password }}"
+    system: "{{ hospedate_user_system }}"
+  tags:
+    - hospedate_user
+
+- name: "Create sudoers config for {{ hospedate_user }} user"
+  become: yes
+  ansible.builtin.template:
+    src: hospedate-sudo.j2
+    dest: "/etc/sudoers.d/{{ hospedate_user }}"
+    owner: root
+    group: root
+    mode: 0440
+    validate: "/usr/sbin/visudo -cf %s"
+
+- name: Package installing PYENV
+  include_tasks: pyenv.yml
+  tags:
+    - hospedate_install_pyenv
+
+- block:
+
+    - name: Create log directory
+      ansible.builtin.file: 
+        path: "{{ hospedate_logdir }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: no
+      tags:
+        - hospedate_log
+
+    - name: Create local repository directory
+      ansible.builtin.file: 
+        path: "{{ hospedate_repo_dest }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_project
+
+    - name: Create Gazella ERP directories before cloning
+      ansible.builtin.file: 
+        path: "/opt/{{ item.name }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}"
+        force: yes
+      with_items: "{{ hospedate_repositories }}"
+
+    - name: Create config directory file
+      ansible.builtin.file: 
+        path: "/etc/{{ hospedate_instance }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_project
+
+    - name: Create pid file run
+      ansible.builtin.file: 
+        path: "/var/run/{{ hospedate_config_pidfile }}" 
+        state: touch
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_pip_file
+
+    - name: Clone project repository (Git) PIP
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.git:  
+        repo: "{{ hospedate_repo_url }}"
+        dest: "{{ hospedate_repo_dest }}"
+        version: "{{ hospedate_repo_rev | string }}"
+        depth: "{{ hospedate_repo_depth }}"
+      when: hospedate_install_type == 'pip' and hospedate_repo_type == 'git' and hospedate_repo_url
+      notify: Restart Odoo
+      tags:
+        - hospedate_git_project
+
+    - name: "Fix installacion odoo - Set options python{{ hospedate_python_main }}"
+      ansible.builtin.lineinfile:
+        dest: "{{ hospedate_repo_dest }}/odoo-bin"
+        state: present
+        regexp: "^#!/usr/bin/env*"
+        line: "#!/usr/bin/env python{{ hospedate_python_main }}"
+
+  when: hospedate_unify_activate == false
+          
+- block:
+
+    - name: Install Unify - Create Unify directory
+      ansible.builtin.file:
+        path: "{{ hospedate_unify_path }}"
+        state: directory
+        owner: "{{ hospedate_user }}"
+        group: "{{ hospedate_group_security }}"
+        mode: 0775
+        force: yes
+
+    - name: Install Unify - Create log directory
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}{{ hospedate_logdir }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: no
+      tags:
+        - hospedate_log_dir
+
+    - name: Install Unify - Create odoo.log file
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}{{ hospedate_logdir }}/{{ hospedate_instance }}.log" 
+        state: touch
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_log_file
+
+    - name: Install Unify - Create local repository directory
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}/app/odoo" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_unify_odoo
+
+    - name: Install Unify - Create Gazella ERP directories before cloning
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}/app/{{ item.name }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}"
+        force: yes
+      with_items: "{{ hospedate_repositories }}"
+
+    - name: Install Unify - Create config directory file
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}/etc/{{ hospedate_instance }}" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_unify_odoo_conf
+
+    - name: Install Unify - Create pid directory 
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}/var/run" 
+        state: directory
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_pid_directory
+
+    - name: Install Unify - Create pid file run
+      ansible.builtin.file: 
+        path: "{{ hospedate_unify_path }}/var/run/{{ hospedate_config_pidfile }}" 
+        state: touch
+        owner: "{{ hospedate_user }}" 
+        group: "{{ hospedate_group_security }}" 
+        force: yes
+      tags:
+        - hospedate_pid_run
+
+    - name: Install Unify - Clone project repository (Git) PIP
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.git:  
+        repo: "{{ hospedate_repo_url }}"
+        dest: "{{ hospedate_unify_path }}/app/odoo"
+        version: "{{ hospedate_repo_rev | string }}"
+        depth: "{{ hospedate_repo_depth }}"
+      when: hospedate_install_type == 'pip' and hospedate_repo_type == 'git' and hospedate_repo_url
+      notify: Restart Odoo
+      tags:
+        - hospedate_project_pip
+
+    - name: "Install Unify - Fix installacion odoo - Set options python{{ hospedate_python_main }}"
+      ansible.builtin.lineinfile:
+        dest: "{{ hospedate_unify_path }}/app/odoo/odoo-bin"
+        state: present
+        regexp: "^#!/usr/bin/env*"
+        line: "#!/usr/bin/env python{{ hospedate_python_main }}"
+
+  when: hospedate_unify_activate == true
+          
+
+- name: Clone project repository (Git) PIP CUSTOM
+  become_user: "{{ hospedate_user }}"
+  ansible.builtin.git:  
+    repo: "{{ hospedate_repo_url }}"
+    dest: "{{ hospedate_repo_dest }}"
+    version: "{{ hospedate_repo_rev | string }}"
+    depth: "{{ hospedate_repo_depth }}"
+  when: hospedate_install_type == 'pip_custom' and hospedate_repo_type == 'git' and hospedate_repo_url
+  notify: Restart Odoo
+  tags:
+    - hospedate_project_custom
+
+- name: Bitbucket repository Downloading Project
+  include_tasks: bitbucket.yml
+  tags:
+    - hospedate_install_customer
+
+- name: Pip installation
+  include_tasks: install_pip.yml
+  when: hospedate_install_type == 'pip'
+  tags:
+    - hospedate_install_type_pip
+
+- name: Pip Custom installation
+  include_tasks: install_pip_custom.yml
+  when: hospedate_install_type == 'pip_custom'
+  tags:
+    - hospedate_install_type_pip_custom
+
+- name: Configure Jasper Report
+  include_tasks: jasper.yml
+  tags:
+    - hospedate_install_jasper
+

@@ -1,0 +1,32 @@
+---
+
+#- name: NPM INSTALL - Configure NodeJS APT repository signing key
+#  ansible.builtin.apt_key:
+#    url: "{{ item.url }}"
+#    state: "{{ item.state }}"
+#  with_items: "{{ gazellaerp_nodejs_apt_keys | default([]) }}"
+
+#- name: NPM INSTALL - Configure NodeJS APT repository
+#  ansible.builtin.apt_repository:
+#    repo: "{{ item.repo }}"
+#    state: "{{ item.state }}"
+#  with_items: "{{ gazellaerp_nodejs_apt_repositories | default([]) }}"
+
+- name: NPM INSTALL - Install NPM
+  ansible.builtin.apt:  
+    pkg: "{{ gazellaerp_npm_apt_package }}"
+    state: present
+    update_cache: yes
+
+- name: NPM INSTALL - Install NodeJS
+  ansible.builtin.apt:  
+    pkg: "{{ gazellaerp_nodejs_apt_package }}"
+    state: present
+    update_cache: yes
+
+- name: NPM INSTALL - Install Odoo dependencies (npm)
+  ansible.builtin.npm:  
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    global: yes
+  with_items: "{{ gazellaerp_npm_packages | default([]) }}"

@@ -1,0 +1,192 @@
+---
+
+
+- name: SECURITY - Stop APPARMOR Service and disable
+  become: yes
+  service:
+    name: apparmor
+    enabled: no
+    state: stopped
+
+- block:
+
+    - name: SECURITY - Put SELinux in selinux-activate
+      become: yes
+      ansible.builtin.shell: sudo selinux-activate
+      ignore_errors: yes
+
+    - name: SECURITY - Put SELinux in permissive mode Enforcing.
+      become: yes
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing
+      ignore_errors: yes
+
+  when: gazellaerp_security_enforcing == true  
+
+- block:
+
+    - name: SECURITY - Put SELinux in permissive mode Permissive.
+      become: yes
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+      ignore_errors: yes
+
+  when: gazellaerp_security_enforcing == false  
+
+- block:
+
+    - name: SECURITY - Set httpd_can_network_connect flag ON and enable it to persist on reboot
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: yes
+        persistent: yes
+
+    - name: SECURITY - Set httpd_can_network_connect_db flag ON and enable it to persist on reboot
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect_db
+        state: yes
+        persistent: yes
+
+    - name: SECURITY - Set ssh_sysadm_login flag ON and enable it to connect SSH
+      ansible.posix.seboolean:
+        name: ssh_sysadm_login
+        state: yes
+        persistent: yes
+
+    - name: SECURITY - Allow http to listen on tcp port 80
+      community.general.seport:
+        ports: 80
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - name: SECURITY - Allow http to listen on tcp port 8069
+      community.general.seport:
+        ports: 8069
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - name: SECURITY - Allow http to listen on tcp port 8072
+      community.general.seport:
+        ports: 8072
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - name: SECURITY - Allow http to listen on tcp port 8090
+      community.general.seport:
+        ports: 8090
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - block:
+
+        - name: SECURITY - Allow Odoo to modify files 
+          become: yes
+          community.general.sefcontext:
+            target: '/opt/odoo'
+            seuser: system_u
+            state: present
+
+        - name: SECURITY - Allow Odoo to modify files in /opt/odoo
+          become: yes
+          community.general.sefcontext:
+            target: '/opt/odoo/(/.*)?'
+            setype: bin_t
+            seuser: system_u
+            state: present
+
+        - name: SECURITY - Allow Odoo to modify files in /var/log/odoo
+          become: yes
+          community.general.sefcontext:
+            target: '/opt/log/odoo/(/.*)?'
+            setype: httpd_log_t
+            seuser: system_u
+            state: present
+
+        - name: SECURITY - Allow Gazella ERP to modify files.
+          become: yes
+          community.general.sefcontext:
+            target: '/opt/{{ item.name }}/(/.*)?'
+            setype: httpd_sys_content_t
+            seuser: system_u
+            state: present
+          with_items: "{{ gazellaerp_repositories }}"
+
+
+        - name: SECURITY - Apply SELinux file context /opt/odoo
+          become: yes
+          ansible.builtin.command: restorecon -R -irv /opt/odoo
+
+        - name: SECURITY - Apply SELinux file context repository
+          become: yes
+          ansible.builtin.command: restorecon -R -irv /opt/{{ item.name }} 
+          with_items: "{{ gazellaerp_repositories }}"
+
+        - name: SECURITY - Apply SELinux file context /var/log/odoo
+          become: yes
+          ansible.builtin.command: restorecon -R -irv /var/log/odoo
+
+      when: gazellaerp_unify_activate == false
+
+
+    - block:
+
+        - name: SECURITY Unify - Apply SELinux chcon {{ gazellaerp_unify_path }}
+          become: yes
+          ansible.builtin.command: chcon -R -u system_u {{ gazellaerp_unify_path }}
+
+        - name: SECURITY Unify - Allow Odoo to modify files in {{ gazellaerp_unify_path }}
+          become: yes
+          community.general.sefcontext:
+            target: '{{ gazellaerp_unify_path }}'
+            seuser: system_u
+            setype: httpd_sys_content_t
+            state: present
+
+        - name: SECURITY Unify - Allow Odoo to modify files in {{ gazellaerp_unify_path }}/app/odoo
+          become: yes
+          community.general.sefcontext:
+            target: '{{ gazellaerp_unify_path }}/app/odoo/(/.*)?'
+            setype: bin_t
+            seuser: system_u
+            state: present
+
+        - name: SECURITY Unify - Allow Odoo to modify files in {{ gazellaerp_unify_path }}/var/log/odoo
+          become: yes
+          community.general.sefcontext:
+            target: '{{ gazellaerp_unify_path }}/var/log/odoo/(/.*)?'
+            setype: httpd_log_t
+            seuser: system_u
+            state: present
+
+        - name: SECURITY Unify - Allow Gazella ERP to modify repository.
+          become: yes
+          community.general.sefcontext:
+            target: '{{ gazellaerp_unify_path }}/app/{{ item.name }}/(/.*)?'
+            setype: httpd_sys_content_t
+            seuser: system_u
+            state: present
+          with_items: "{{ gazellaerp_repositories }}"
+
+
+        - name: SECURITY Unify - Apply SELinux file context {{ gazellaerp_unify_path }}/app/odoo
+          become: yes
+          ansible.builtin.command: restorecon -R -irv {{ gazellaerp_unify_path }}/app/odoo
+
+        - name: SECURITY Unify - Apply SELinux file context repository
+          become: yes
+          ansible.builtin.command: restorecon -R -irv {{ gazellaerp_unify_path }}/app/{{ item.name }} 
+          with_items: "{{ gazellaerp_repositories }}"
+
+        - name: SECURITY Unify - Apply SELinux file context /var/log/odoo
+          become: yes
+          ansible.builtin.command: restorecon -R -irv {{ gazellaerp_unify_path }}/var/log/odoo
+
+      when: gazellaerp_unify_activate == true
+
+

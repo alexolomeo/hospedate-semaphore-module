@@ -1,0 +1,10 @@
+[program:hospedate-celery-default]
+command=/home/hospedate/hospedate-backend/venv/bin/celery -A config worker -Q celery --loglevel=info --concurrency=2
+directory=/home/hospedate/hospedate-backend
+user=hospedate
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/hospedate/hospedate-backend/logs/celery-default.log
+environment=DJANGO_ENV="production",DJANGO_SETTINGS_MODULE="config.django.production",GOOGLE_APPLICATION_CREDENTIALS="/etc/gcp/firebase-sa.json",GOOGLE_CLOUD_PROJECT="hospedate-prod",GOOGLE_CLOUD_QUOTA_PROJECT="hospedate-prod",AWS_REGION="us-east-2"
+

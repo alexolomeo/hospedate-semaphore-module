@@ -1,0 +1,10 @@
+---
+
+- name: "Prepare application to sync"
+  ansible.builtin.include_tasks: sync.yml
+  when: hospedate_mode == 'sync'    
+
+- name: "Prepare application to get info "
+  ansible.builtin.include_tasks: get-info.yml
+  when: hospedate_mode == 'get-info'    
+

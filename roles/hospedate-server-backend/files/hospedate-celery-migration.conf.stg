@@ -1,0 +1,10 @@
+[program:hospedate-celery-migration]
+command=/home/hospedate/hospedate-backend/venv/bin/celery -A config worker -Q migration --loglevel=info --concurrency=2 --prefetch-multiplier=1 --max-tasks-per-child=100
+directory=/home/hospedate/hospedate-backend
+user=hospedate
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/hospedate/hospedate-backend/logs/celery-migration.log
+environment=DJANGO_ENV="staging",DJANGO_SETTINGS_MODULE="config.django.staging",GOOGLE_APPLICATION_CREDENTIALS="/etc/gcp/firebase-sa.json",GOOGLE_CLOUD_PROJECT="hospedate-staging",GOOGLE_CLOUD_QUOTA_PROJECT="hospedate-staging",AWS_REGION="us-east-2"
+

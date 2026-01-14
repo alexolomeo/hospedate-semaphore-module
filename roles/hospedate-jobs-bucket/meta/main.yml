@@ -1,0 +1,26 @@
+galaxy_info:
+  role_name: hospedate-jobs-bucket
+  namespace: middleware_automation
+  author: Alexander Aguilar Torrico
+  description: Hospedate project bucket ...
+  company: BoliviaDevs.
+
+  license: Apache License 2.0
+
+  min_ansible_version: "2.9"
+
+  platforms:
+   - name: EL
+     versions:
+     - 8
+     - 9
+   - name: Debian
+     versions:
+     - 22.04
+     - 24.04
+
+  galaxy_tags:
+    - amazon ami
+    - s3
+    - ubuntu
+    - aws-cli

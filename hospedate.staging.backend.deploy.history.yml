@@ -1,7 +1,7 @@
 ---
 
 - name: frontend production rollback
-  hosts: hospedate-com-production
+  hosts: hospedate-com-staging
 #  become: true
   roles:
     - role: hospedate-jobs-rollback-com

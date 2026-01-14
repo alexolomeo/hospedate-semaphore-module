@@ -1,0 +1,45 @@
+#Add any required envvar overrides to this file, it is sourced from /etc/profile
+
+alias hospedate-backend-logd="cd /var/log/django"
+alias hospedate-backend-bind="cd /opt"
+
+alias hospedate-backend-update-ower='sudo chown {{ gazellaerp_user }}:{{ gazella_group_security }}  {{ app_path }} -R'
+alias hospedate-backend-log='tail -f  {{ log_path }}/var/log/odoo/odoo.log'
+alias hospedate-backend-log-zip='sudo zip erp-server-log-$(date +"%Y%m%d-%H%M").zip {{ log_path }}/var/log/odoo/odoo.log'
+
+alias hospedate-backend-restart='sudo systemctl restart odoo-server'
+alias hospedate-backend-status='sudo systemctl status odoo-server'
+alias hospedate-backend-start='sudo systemctl start odoo-server'
+alias hospedate-backend-stop='sudo systemctl stop odoo-server'
+alias hospedate-backend-ping='ping 8.8.8.8 -c 5'
+alias hospedate-backend-memory='free -m'
+alias hospedate-backend-disk='sudo df -khT'
+
+alias hospedate-backend-network-interface='ifconfig'
+alias hospedate-backend-network-listen='netstat -antp | grep LISTEN'
+
+alias hospedate-backend-proccess-list='ps -aux'
+alias hospedate-backend-proccess-python='ps -ef | grep python3'
+
+alias hospedate-backend-firewall-status='sudo systemctl status ufw'
+alias hospedate-backend-firewall-restart='sudo systemctl restart ufw'
+alias hospedate-backend-firewall-stop='sudo systemctl stop ufw'
+alias hospedate-backend-firewall-show='sudo ufw status verbose'
+
+alias hospedate-backend-security-status='sudo getenforce'
+alias hospedate-backend-security-disable='sudo setenforce 0'
+alias hospedate-backend-security-enable='sudo setenforce 1'
+alias hospedate-backend-security-protocol='sudo getsebool -a | grep httpd_can_network_connect'
+alias hospedate-backend-security-port='sudo semanage port -l | grep http_port'
+
+alias hospedate-backend-cpu='top'
+
+alias ..="cd .."
+alias ...="cd ../.."
+alias l='ls -lah'
+alias ll="exa -l"
+alias la="exa -la"
+
+# Jumps
+alias ~="cd "
+

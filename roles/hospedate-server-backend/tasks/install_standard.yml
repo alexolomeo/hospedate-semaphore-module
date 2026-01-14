@@ -1,0 +1,22 @@
+---
+
+- name: Install Odoo dependencies
+  ansible.builtin.apt:  
+    pkg: "{{ item }}"
+    state: present
+    update_cache: "{{ gazellaerp_apt_update_cache }}"
+    cache_valid_time: "{{ gazellaerp_apt_cache_valid_time }}"
+  with_items: "{{ gazellaerp_debian_packages }}"
+  tags:
+    - gazellaerp_packages
+
+- name: Install Odoo dependencies (PyPi)
+  ansible.builtin.pip: 
+    name: {{ item }}
+  with_items: "{{ gazellaerp_pypi_packages }}"
+  tags:
+    - gazellaerp_packages
+
+- import_tasks: config.yml
+  tags:
+    - gazellaerp_config

@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  author: Alexander Aguilar Torrico
+  description: Gazellacom role to install all application and configure it.
+  company: SWISTECH SOLUTIONS
+  license: GPLv3
+  min_ansible_version: 2.9
+  platforms:
+    - name: Centos
+      versions:
+        - v.6
+        - v.7
+    - name: Ubuntu
+      versions:
+        - trusty
+        - xenial
+  categories:
+    - web
+dependencies: []

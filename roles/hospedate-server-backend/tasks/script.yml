@@ -1,0 +1,74 @@
+---
+
+- name: Copy the gazellaerp-autobackup-db script
+  ansible.builtin.copy: 
+    src: gazellaerp-autobackup-db 
+    dest: /usr/bin/gazellaerp-autobackup-db
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-initial-db script
+  ansible.builtin.copy: 
+    src: gazellaerp-initial-db 
+    dest: /usr/bin/gazellaerp-initial-db
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-clean-db script
+  ansible.builtin.copy: 
+    src: gazellaerp-clean-db 
+    dest: /usr/bin/gazellaerp-clean-db
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-clean-db-digitalocean script
+  ansible.builtin.copy: 
+    src: gazellaerp-clean-db-digitalocean
+    dest: /usr/bin/gazellaerp-clean-db-digitalocean
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-copyfromprod-db script
+  ansible.builtin.copy: 
+    src: gazellaerp-copyfromprod-db 
+    dest: /usr/bin/gazellaerp-copyfromprod-db
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-restore-db-sql script
+  ansible.builtin.copy: 
+    src: gazellaerp-restore-db-sql 
+    dest: /usr/bin/gazellaerp-restore-db-sql
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-restore-db-bkp script
+  ansible.builtin.copy: 
+    src: gazellaerp-restore-db-bkp
+    dest: /usr/bin/gazellaerp-restore-db-bkp
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+
+- name: Copy the gazellaerp-sync-db-upload script
+  ansible.builtin.copy: 
+    src: gazellaerp-sync-db-upload 
+    dest: /usr/bin/gazellaerp-sync-db-upload
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazellaerp_user }}"
+    force: no 
+    mode: 0775
+

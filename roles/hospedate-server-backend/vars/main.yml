@@ -1,0 +1,64 @@
+---
+
+hospedate_apt_update_cache: yes
+hospedate_apt_cache_valid_time: 86400
+
+hospedate_required_tools:
+    - sudo
+    - curl
+    - git
+    - nginx
+    - net-tools
+    - wget
+    - zip
+    - unzip
+    - ufw
+    - supervisor  
+    - auditd
+    - xz-utils
+    - policycoreutils
+    - selinux-utils
+    - selinux-basics
+    - policycoreutils-python-utils
+    - bat
+    - fzf
+    - exa
+    - screen
+    - tldr
+
+hospedate_required_dev:
+    - python3.12 
+    - python3.12-venv 
+    - python3.12-dev 
+    - python3-pip 
+    - libproj-dev 
+    - gdal-bin 
+    - libgdal-dev 
+    - binutils 
+    - libpq5 
+    - libpq-dev 
+    - libavif-bin 
+    - libavif-dev 
+    - libjpeg-dev 
+    - libpng-dev 
+    - libtiff-dev 
+    - libwebp-dev 
+    - libopenjp2-7-dev 
+    - libimagequant-dev 
+    - zlib1g-dev 
+    - libffi-dev 
+    - gettext 
+
+hospedate_buildout_venv_cmd: "virtualenv --no-setuptools {{ hospedate_buildout_venv_path }}"
+
+#hospedate_pip_venv_cmd: "virtualenv {{ hospedate_pip_venv_path }}"
+hospedate_pip_venv_cmd: "virtualenv --python=python3 {{ hospedate_pip_venv_path }}"
+
+#hospedate_pip_cmd: "pip3 install -r /opt/{{ hospedate_instance }}/requirements.txt"
+#hospedate_pip_cmd: "sudo -H pip3 install -r /opt/odoo/requirements.txt"
+hospedate_pip_cmd: "/home/{{ hospedate_user }}/.pyenv/shims/pip3 install -r /opt/odoo/requirements.txt"
+hospedate_pip_cmd_unify: "/home/{{ hospedate_user }}/.pyenv/shims/pip3 install -r {{ hospedate_unify_path }}/app/odoo/requirements.txt"
+
+# SSH
+hospedate_ssh_keyscan_cmd: "ssh-keyscan -H -T 10"
+

@@ -1,0 +1,48 @@
+---
+
+- name: Install pip custom dependencies
+  ansible.builtin.apt:  
+    pkg: {{ item }}
+    state: present
+    update_cache: {{ gazellaerp_apt_update_cache }}
+    cache_valid_time: {{ gazellaerp_apt_cache_valid_time }}
+  with_items: "{{ gazellaerp_pip_custom }}"
+
+- name: Install virtual  dependencies
+  ansible.builtin.apt:  
+    pkg: {{ item }}
+    state: present
+    update_cache: {{ gazellaerp_apt_update_cache }}
+    cache_valid_time: {{ gazellaerp_apt_cache_valid_time }}
+  with_items: "{{ gazellaerp_virtualenv_dependencies }}"
+
+- name: Prepare the Python virtual environment
+  become: yes
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.shell: "{{ gazellaerp_pip_venv_cmd }}"
+  args:
+    creates: "{{ gazellaerp_pip_venv_path }}"
+
+- name: Install Odoo from pip external requirements file
+  become: yes
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.pip:
+    requirements: /opt/{{ gazellaerp_instance }}/requirements.txt
+    state: forcereinstall
+    virtualenv: "{{ gazellaerp_pip_venv_path }}"
+  notify: Restart Odoo
+
+- name: Install Odoo from pip dependences with root
+  become: yes
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.pip: 
+    name: "{{ item }}"
+    state: forcereinstall
+    virtualenv: "{{ gazellaerp_pip_venv_path }}"
+  with_items: "{{ gazellaerp_pip_custom_embedded }}"
+  notify: Restart Odoo
+
+- import_tasks: config.yml
+  tags:
+    - gazellaerp_config
+

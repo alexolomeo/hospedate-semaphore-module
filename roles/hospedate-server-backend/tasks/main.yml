@@ -1,0 +1,44 @@
+---
+
+- name: Set variables depending on Odoo dependency
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "../vars/{{ ansible_distribution }}-{{ ansible_distribution_major_version | int}}_Django.yml"
+  tags:
+    - always
+
+- include_tasks: require.yml
+  tags:
+    - hospedate_require
+
+- include_tasks: install.yml
+  tags:
+    - hospedate_install
+
+- include_tasks: install_npm.yml
+  tags:
+    - hospedate_install_npm
+
+- include_tasks: service.yml
+  tags:
+    - hospedate_service
+
+- include_tasks: alias.yml
+  tags:
+    - hospedate_alias
+
+
+- include_tasks: firewall.yml
+  tags:
+    - hospedate_firewall
+
+
+- include_tasks: security.yml
+  tags:
+    - hospedate_security
+
+      
+- include_tasks: postgresql_client.yml
+  tags:
+    - hospedate_postgresql_client
+

@@ -1,0 +1,11 @@
+Host github.com
+  AddKeysToAgent yes
+  PreferredAuthentications publickey
+  User alexolomeo
+  IdentityFile ~/.ssh/{{ github_repositories_key }}
+
+Host *
+        IdentitiesONly yes
+        ServerAliveInterval 600
+        ServerAliveCountMax 15
+        IPQoS lowdelay throughput

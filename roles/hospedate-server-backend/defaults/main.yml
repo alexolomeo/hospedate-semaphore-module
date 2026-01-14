@@ -1,0 +1,62 @@
+ansible_ssh_pipelining: true
+
+hospedate_projectname: projectname
+hospedate_install_type: pip     # standard, pip, pip_custom
+hospedate_version: 11.0
+hospedate_service: odoo-server
+hospedate_instance: odoo
+hospedate_user: hospedate
+hospedate_user_passwd: "*" 
+hospedate_user_update_password: always
+hospedate_user_shell: /bin/bash
+hospedate_user_system: False
+hospedate_init: True
+hospedate_init_env: {}
+hospedate_logdir: "/var/log/odoo"
+hospedate_logfile: "{{ hospedate_instance }}.log"
+hospedate_workdir: "/opt/{{ hospedate_instance }}"
+hospedate_rootdir: "{{ hospedate_install_type == 'buildout' and '/opt/'+hospedate_instance or '/opt/'+hospedate_intance+'/odoo/server' }}"
+hospedate_repo_type: git     # git
+hospedate_repo_url: "{{ hospedate_install_type == 'buildout' and 'https://github.com/osiell/odoo-buildout-example.git' or 'https://github.com/odoo/odoo.git' }}"
+hospedate_repo_dest: "{{ hospedate_install_type == 'buildout' and hospedate_workdir or hospedate_rootdir }}"
+hospedate_repo_rev: "{{ hospedate_version }}"
+hospedate_repo_update: True  # Update the working copy or not. This option is
+hospedate_repo_depth: 1      # Set to 0 to clone the full history (slower)
+hospedate_config_domain: #hostname
+hospedate_config_file: "/etc/{{ hospedate_instance }}/{{ hospedate_service }}.conf"
+hospedate_config_file_unify: "{{ hospedate_unify_path }}/etc/{{ hospedate_instance }}/{{ hospedate_service }}.conf"
+hospedate_force_config: True
+hospedate_config_addons_path:
+    - "/opt/{{ hospedate_instance }}/addons"
+hospedate_config_admin_passwd: admin
+hospedate_config_auto_reload: False
+hospedate_config_csv_internal_sep: ','
+hospedate_config_data_dir: "/home/{{ hospedate_user }}/.local/share/Odoo"
+hospedate_config_db_host: False
+hospedate_config_db_host_user: "{{ ansible_user }}"
+hospedate_config_db_maxconn: 64
+hospedate_config_db_name: False
+hospedate_config_db_passwd: False
+hospedate_config_db_port: False
+hospedate_config_db_sslmode: prefer          # >= 11.0
+hospedate_config_db_template: template1
+hospedate_config_db_user: "{{ hospedate_user }}"
+hospedate_config_db_user_main: False
+hospedate_config_db_passwd_main: False
+hospedate_config_dbfilter: '.*'
+hospedate_config_pidfile: "{{ hospedate_instance }}.pid"
+hospedate_config_proxy_mode: False
+hospedate_config_email_from: False
+hospedate_config_http_enable: True           # >= 11.0
+hospedate_config_http_interface: ''          # >= 11.0
+hospedate_config_http_port: 8069             # >= 11.0
+hospedate_config_log_db: False
+hospedate_config_log_level: info
+hospedate_config_logfile: None
+hospedate_config_logrotate: False
+
+hospedate_user_ssh_dir: "/home/{{ hospedate_user }}/.ssh"
+hospedate_user_ssh_key: {}
+hospedate_user_ssh_known_hosts_file: "{{ hospedate_user_ssh_dir }}/known_hosts"
+hospedate_user_ssh_known_hosts: []
+hospedate_user_sshkeys: ""       # ./path/to/public_keys/*

@@ -1,0 +1,22 @@
+---
+
+- name: Generate Odoo configuration file
+  ansible.builtin.template: 
+    src: "odoo-{{ gazellaerp_version }}.conf.j2" 
+    dest: "{{ gazellaerp_config_file }}"
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazella_group_security }}" 
+    mode: 0600
+  notify: Restart Odoo
+  when: gazellaerp_unify_activate == false
+  
+- name: Generate Unify Odoo configuration file
+  ansible.builtin.template: 
+    src: "odoo-{{ gazellaerp_version }}.conf.unify.j2" 
+    dest: "{{ gazellaerp_config_file_unify }}"
+    owner: "{{ gazellaerp_user }}" 
+    group: "{{ gazella_group_security }}" 
+    mode: 0600
+  notify: Restart Odoo
+  when: gazellaerp_unify_activate == true
+  

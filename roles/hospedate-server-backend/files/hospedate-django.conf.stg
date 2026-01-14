@@ -1,0 +1,10 @@
+[program:hospedate-django]
+command=/home/hospedate/hospedate-backend/venv/bin/gunicorn config.wsgi:application -c /home/hospedate/hospedate-backend/gunicorn.conf.py
+directory=/home/hospedate/hospedate-backend
+user=hospedate
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/home/hospedate/hospedate-backend/logs/django.log
+environment=DJANGO_ENV="staging",DJANGO_SETTINGS_MODULE="config.django.staging",GOOGLE_APPLICATION_CREDENTIALS="/etc/gcp/firebase-sa.json",GOOGLE_CLOUD_PROJECT="hospedate-staging",AWS_REGION="us-east-2",AWS_ROLE_ARN="arn:aws:iam::590169045949:role/hospedate-staging-ec2-role"
+

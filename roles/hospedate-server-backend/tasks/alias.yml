@@ -1,0 +1,36 @@
+---
+
+- name: Install - Copy the /etc/profile.d/gazella-alias.sh {{ ansible_distribution }}
+  ansible.builtin.template:
+    src: gazellaerp-alias-Ubuntu.j2
+    dest: /etc/profile.d/gazella-erp-alias.sh
+    owner: root
+    group: root
+    force: yes
+    mode: 0644
+
+- name: Install - Copy the Root bashrc script {{ ansible_distribution }}
+  become: yes
+  blockinfile:
+    path: /root/.bashrc
+    block: |
+      # Script Alias profile
+      if [ -f /etc/profile.d/gazella-erp-alias.sh ]; then
+        . /etc/profile.d/gazella-erp-alias.sh
+      fi
+    state: present
+    insertbefore: EOF
+#    marker: "# START ANSIBLE MANAGED BLOCK"
+
+- name: Install - Copy the {{ gazellaerp_user }}  bashrc script {{ ansible_distribution }}
+  become_user: "{{ gazellaerp_user }}"
+  blockinfile:
+    path: /home/{{ gazellaerp_user }}/.bashrc
+    block: |
+      # Script Alias profile
+      if [ -f /etc/profile.d/gazella-erp-alias.sh ]; then
+        . /etc/profile.d/gazella-erpm-alias.sh
+      fi
+    state: present
+    insertbefore: EOF
+#marker: "# START ANSIBLE MANAGED BLOCK"

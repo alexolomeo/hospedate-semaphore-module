@@ -1,0 +1,84 @@
+---
+
+- name: Bitbucket prepare directory
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.file:
+    path: /home/{{ gazellaerp_user }}/.ssh
+    state: directory
+    owner: "{{ gazellaerp_user }}"
+    group: "{{ gazella_group_security }}"
+    mode: 0700
+    force: yes
+  tags:
+    - gazellaerp_project
+
+- name: Bitbucket copy config file to remote host
+  become: yes
+  ansible.builtin.template:
+    src: bitbucket.config.j2
+    dest: /home/{{ gazellaerp_user }}/.ssh/config
+    owner: "{{ gazellaerp_user }}"
+    group: "{{ gazella_group_security }}"
+    mode: 0644
+    force: yes
+    backup: yes
+
+- name: Bitbucket add Key RSA access to repository
+  become: yes
+  ansible.builtin.copy:
+    src: "./{{ bitbucket_repositories_key }}"
+    dest: "/home/{{ gazellaerp_user }}/.ssh/{{ bitbucket_repositories_key }}"
+    owner: "{{ gazellaerp_user }}"
+    group: "{{ gazella_group_security }}"
+    force: no
+    mode: 0400
+
+
+- block:
+
+    - name: Bitbucket Clone Gazella ERP repositories from bitbucket
+      become_user: "{{ gazellaerp_user }}"
+      ansible.builtin.git:
+        repo: git@bitbucket.org:Swissbytes/{{ item.name }}.git
+        dest: "{{ gazellaerp_repo_dest }}/../{{ item.name }}"
+        version: "{{ item.version }}"
+        accept_hostkey: yes
+      with_items: "{{ gazellaerp_repositories }}"
+      ignore_errors: yes
+
+    - name: Bitbucket Recursively change ownership
+      become_user: "{{ gazellaerp_user }}"
+      file:
+        path: "/opt/{{ item.name }}"
+        state: directory
+        recurse: yes
+        owner: "{{ gazellaerp_user }}"
+        group: "{{ gazella_group_security }}"
+      with_items: "{{ gazellaerp_repositories }}"
+
+  when: gazellaerp_unify_activate == false
+
+- block:
+
+    - name: Bitbucket Clone Gazella ERP repositories from bitbucket
+      become_user: "{{ gazellaerp_user }}"
+      ansible.builtin.git:
+        repo: git@bitbucket.org:Swissbytes/{{ item.name }}.git
+        dest: "{{ gazellaerp_unify_path }}/app/{{ item.name }}"
+        version: "{{ item.version }}"
+        accept_hostkey: yes
+      with_items: "{{ gazellaerp_repositories }}"
+      ignore_errors: yes
+
+    - name: Bitbucket Recursively change ownership
+      become_user: "{{ gazellaerp_user }}"
+      file:
+        path: "{{ gazellaerp_unify_path }}/app/{{ item.name }}"
+        state: directory
+        recurse: yes
+        owner: "{{ gazellaerp_user }}"
+        group: "{{ gazella_group_security }}"
+      with_items: "{{ gazellaerp_repositories }}"
+
+  when: gazellaerp_unify_activate == true
+

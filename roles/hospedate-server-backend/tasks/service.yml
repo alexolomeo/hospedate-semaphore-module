@@ -1,0 +1,151 @@
+---
+
+- block:
+    - name: Generate systemd Odoo service (PIP)
+      ansible.builtin.template:
+        src: odoo-pip.service.j2
+        dest: /etc/systemd/system/{{ gazellaerp_service }}.service
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify:
+      - Reload Systemd
+      - Restart Odoo
+  when: ( gazellaerp_install_type == 'pip' ) and ( gazellaerp_unify_activate == false )
+
+- block:
+    - name: Generate Unify systemd Odoo service (PIP)
+      ansible.builtin.template:
+        src: odoo-pip.service.unify.j2
+        dest: /etc/systemd/system/{{ gazellaerp_service }}.service
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify:
+      - Reload Systemd
+      - Restart Odoo
+  when: ( gazellaerp_install_type == 'pip' ) and ( gazellaerp_unify_activate == true )
+
+- block:
+    - name: Generate Jasper init script (PIP)
+      ansible.builtin.template: 
+        src: jasper-report.init.j2 
+        dest: /etc/init.d/jasper-report
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify: Restart Odoo
+  when: ( gazellaerp_install_type == 'pip' ) and ( gazellaerp_unify_activate == false )
+
+- block:
+    - name: Generate Unify Jasper init script (PIP)
+      ansible.builtin.template: 
+        src: jasper-report.init.unify.j2 
+        dest: /etc/init.d/jasper-report
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify: Restart Odoo
+  when: ( gazellaerp_install_type == 'pip' ) and ( gazellaerp_unify_activate == true )
+
+- block:
+    - name: Generate systemd Odoo service (Pip Custom)
+      ansible.builtin.template:
+        src: odoo-pip-custom.service.j2
+        dest: /etc/systemd/system/{{ gazellaerp_service }}.service
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify:
+      - Reload Systemd
+      - Restart Odoo
+  when: ( gazellaerp_install_type == 'pip_custom' ) and ( gazellaerp_unify_activate == false )
+
+- block:
+    - name: Generate Unify systemd Odoo service (Pip Custom)
+      ansible.builtin.template:
+        src: odoo-pip-custom.service.unify.j2
+        dest: /etc/systemd/system/{{ gazellaerp_service }}.service
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify:
+      - Reload Systemd
+      - Restart Odoo
+  when: ( gazellaerp_install_type == 'pip_custom' ) and ( gazellaerp_unify_activate == true )
+
+- block:
+    - name: Generate Odoo init script (Pip Custom)
+      ansible.builtin.template: 
+        src: jasper-report.init.j2 
+        dest: /etc/init.d/jasper-report
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: yes
+      when: ansible_service_mgr == 'systemd'
+      notify: Restart Odoo
+  when: gazellaerp_install_type == 'pip_custom'
+
+- block:
+    - name: Generate nginx conf (NGINX)
+      ansible.builtin.template: 
+        src: nginx.conf.j2 
+        dest: /etc/nginx/sites-available/default
+        owner: root 
+        group: root 
+        mode: 0755
+        force: yes
+        backup: no
+      when: ansible_service_mgr == 'systemd'
+      notify: Restart Odoo
+
+- name: Enable Nginx service
+  ansible.builtin.service: 
+    name: nginx 
+    enabled: yes 
+    state: started
+  when: gazellaerp_init == True
+
+- name: Enable Odoo service
+  ansible.builtin.service: 
+    name: "{{ gazellaerp_service }}" 
+    enabled: yes 
+    state: started
+  when: gazellaerp_init == True
+
+- name: Disable Odoo service
+  ansible.builtin.service: 
+    name: "{{ gazellaerp_service }}" 
+    enabled: no 
+    state: stopped
+  when: gazellaerp_init == False
+
+- name: Fix to Odoo pid file When restart the O.S.
+  ansible.builtin.template:
+    src: rc.local.j2
+    dest: /etc/rc.local
+    owner: root
+    group: root
+    mode: 0755
+    force: yes
+    backup: no

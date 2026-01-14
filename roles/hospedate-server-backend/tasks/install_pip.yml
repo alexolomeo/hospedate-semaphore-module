@@ -1,0 +1,66 @@
+---
+
+- name: PIP Install - Install pip dependencies
+  ansible.builtin.apt:  
+    pkg: "{{ item }}"
+    state: present
+    update_cache: "{{ gazellaerp_apt_update_cache }}"
+    cache_valid_time: "{{ gazellaerp_apt_cache_valid_time }}"
+  with_items: "{{ gazellaerp_pip35 }}"
+
+
+- name: PIP Install - Update PIP Version for preparing instalation "{{ gazellaerp_user }}"
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.shell:
+    cmd: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install pip==20.3.4 --upgrade"
+
+- name: PIP Install - Update Setuptools  Version for preparing instalation "{{ gazellaerp_user }}"
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.shell:
+    cmd: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install setuptools==46.1.3 --upgrade"
+
+- name: PIP Install - Install PIP install pusher==2.1.2
+  become_user: "{{ gazellaerp_user }}"  
+  ansible.builtin.shell:
+    cmd: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install pusher==2.1.2"
+
+- name: PIP Install - Install PIP install phonenumbers
+  become_user: "{{ gazellaerp_user }}"  
+  ansible.builtin.shell:
+    cmd: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install phonenumbers"
+
+- name: PIP Install - Install PIP install OdooRPC==0.7.0
+  become_user: "{{ gazellaerp_user }}"  
+  ansible.builtin.shell:
+    cmd: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install OdooRPC==0.7.0"
+
+- name: "PIP Install - Install Odoo from pip requirements file with {{ gazellaerp_user }} /opt/odoo/requirements.txt"
+  become_user: "{{ gazellaerp_user }}"  
+  ansible.builtin.shell: "{{ gazellaerp_pip_cmd }}"
+  register: log_pip_install
+  args:
+    creates: "{{ gazellaerp_instance }}"
+  notify: Restart Odoo
+  when: gazellaerp_unify_activate == false
+
+
+- name: "PIP Install - Install Odoo from pip requirements file with {{ gazellaerp_user }}  {{ gazellaerp_unify_path }}/app/odoo/requirements.txt"
+  become_user: "{{ gazellaerp_user }}"  
+  ansible.builtin.shell: "{{ gazellaerp_pip_cmd_unify }}"
+  register: log_pip_install
+  args:
+    creates: "{{ gazellaerp_instance }}"
+  notify: Restart Odoo
+  when: gazellaerp_unify_activate == true
+
+- name: "PIP Install - DEBUG Install PIP requirements.txt file"
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.debug:
+    var: log_install.stdout
+
+- import_tasks: config.yml
+  tags:
+    - gazellaerp_config
+
+
+

@@ -1,0 +1,13 @@
+---
+- name: hospedate staging bucket sync
+  hosts: semaphore_server
+  vars:
+    hospedate_group_security: hospedate
+  roles:
+    - role: hospedate-jobs-bucket
+      hospedate_mode: sync                         #backup, copyfromprod, restore, cleandb
+      hospedate_project: hospedate                       # client
+      hospedate_environment: staging             #staging, production
+      hospedate_bucket_origin: s3://hospedate-prod-app/
+      hospedate_bucket_target: null
+

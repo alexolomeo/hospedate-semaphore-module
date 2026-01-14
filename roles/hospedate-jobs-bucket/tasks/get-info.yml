@@ -1,0 +1,27 @@
+---
+  
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Stop service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: wildfly
+
+- name: "{{ hospedate_project|upper }} {{ hospedate_app|upper }} {{ hospedate_environment|upper }} RESTART SERVER - Start service wildfly"
+  become: yes
+  ansible.builtin.systemd_service:
+    state: started
+    name: wildfly
+
+- name: "PYENV - update pip3 version 20.0.2"
+  become_user: "{{ gazellaerp_user }}"
+  ansible.builtin.shell: "/home/{{ gazellaerp_user }}/.pyenv/shims/pip3 install pip==20.0.2 --upgrade"
+  args:
+    chdir: "/home/{{ gazellaerp_user }}"
+
+- name: "PYENV - Remove link to python {{ gazellaerp_version_main }}"
+  become: yes
+  ansible.builtin.shell: "rm -rf /usr/bin/python{{ gazellaerp_python_main }}"
+
+- name: "PYENV - Create link to python {{ gazellaerp_version_main }}"
+  become: yes
+  ansible.builtin.shell: "ln -s /home/{{ gazellaerp_user }}/.pyenv/versions/{{ gazellaerp_python }}/bin/python{{ gazellaerp_python_main }} /usr/bin/python{{ gazellaerp_python_main }}"
