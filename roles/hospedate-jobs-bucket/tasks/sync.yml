@@ -9,7 +9,7 @@
     my_date: "{{ tstamp.stdout[0:8]}}"
     my_time: "{{ tstamp.stdout[8:]}}"
 
-- name: Create log directory
+- name: BUCKET - Create log directory for semaphore log
   become: yes
   ansible.builtin.file:
     path: "{{ hospedate_logdir }}"
@@ -17,7 +17,7 @@
     owner: "{{ hospedate_user }}"
     group: "{{ hospedate_group_security }}"
     mode: '0755'  
-    force: no
+#    force: no
 
 - name: "BUCKET - Bucket log to historial on server controller"
   become: yes
