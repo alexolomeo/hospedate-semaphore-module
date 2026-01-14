@@ -8,4 +8,5 @@ hospedate_group_security: "{{ hospedate_group_security }}"
 hospedate_bucket: null 
 hospedate_bucket_origin: null
 hospedate_bucket_target: null
+hospedate_logdir: /tmp/semaphore
 
