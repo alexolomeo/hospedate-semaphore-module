@@ -40,5 +40,5 @@
 
       ===== STDERR =====
       {{ s3_sync.stderr }}
-    dest: "/bucket-sync-output-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.log"
+    dest: "{{ hospedate_logdir }}/bucket-sync-output-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.log"
     mode: '0644'
