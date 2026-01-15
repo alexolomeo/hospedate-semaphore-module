@@ -5,8 +5,9 @@
   register: tstamp
 
 - name: "Get timestamp to stimate duration"
-  shell: "date +%Y-%m-%dT%H:%M:%S"
+  shell: "date"
   register: duration
+#  shell: "date +%Y-%m-%dT%H:%M:%S"
 
 - name: "Set variables"
   set_fact:
