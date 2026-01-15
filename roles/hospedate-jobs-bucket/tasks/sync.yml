@@ -44,5 +44,5 @@
 
 - name: "BUCKET - Bucket history log finish sync"
   become: yes
-  ansible.builtin.shell: echo "[ finish time {{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}] - {{ hospedate_environment }} - BUCKET SYNC FINISH  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
+  ansible.builtin.shell: echo "[ finish {{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}] - {{ hospedate_environment }} - BUCKET SYNC FINISH  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
 
