@@ -4,6 +4,10 @@
   shell: "date +%Y%m%d-%H%M"
   register: tstamp
 
+- name: "Get timestamp to stimate duration"
+  shell: "date +%Y-%m-%dT%H:%M:%S"
+  register: duration
+
 - name: "Set variables"
   set_fact:
     my_date: "{{ tstamp.stdout[0:8]}}"
@@ -44,7 +48,7 @@
 
 - name: BUCKET - Get duration time playbook
   set_fact:
-    start_time: "{{ ansible_playbook_start }}"
+    start_time: "{{ duration.stdout }}"
     end_time: "{{ ansible_date_time.iso8601 }}"
         
 - name: BUCKET - Set duration time 
