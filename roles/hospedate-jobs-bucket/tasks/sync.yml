@@ -42,7 +42,18 @@
     dest: "{{ hospedate_logdir }}/bucket-sync-output-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.log"
     mode: '0644'
 
+- name: BUCKET - Get duration time playbook
+  set_fact:
+    start_time: "{{ ansible_playbook_start }}"
+    end_time: "{{ ansible_date_time.iso8601 }}"
+        
+- name: BUCKET - Set duration time 
+  set_fact:
+    duration_minutes: "{{ ( (end_time | to_datetime('%Y-%m-%dT%H:%M:%S')) - (start_time | to_datetime('%Y-%m-%dT%H:%M:%S')) ).seconds / 60 }}"
+    end_hour: "{{ (end_time | to_datetime('%Y-%m-%dT%H:%M:%S')).strftime('%H:%M') }}"
+
 - name: "BUCKET - Bucket history log finish sync"
   become: yes
-  ansible.builtin.shell: echo "[ finish {{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}] - {{ hospedate_environment }} - BUCKET SYNC FINISH  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
+  ansible.builtin.shell: echo "[ duration {{ duration_minutes | round(0) }} min ] - {{ hospedate_environment }} - FINISH SYNC {{ end_hour }}  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
+
 
