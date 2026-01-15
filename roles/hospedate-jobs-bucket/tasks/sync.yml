@@ -48,7 +48,7 @@
 
 - name: BUCKET - Get duration time playbook
   set_fact:
-    start_time: "{{ duration.stdout }}"
+    start_time: "{{ duration.stdout | to_datetime('%Y-%m-%dT%H:%M:%S') }}"
     end_time: "{{ ansible_date_time.iso8601 }}"
         
 - name: BUCKET - Set duration time 
