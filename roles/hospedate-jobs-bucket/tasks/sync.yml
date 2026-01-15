@@ -41,3 +41,8 @@
       {{ s3_sync.stderr }}
     dest: "{{ hospedate_logdir }}/bucket-sync-output-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.log"
     mode: '0644'
+
+- name: "BUCKET - Bucket history log finish sync"
+  become: yes
+  ansible.builtin.shell: echo "[ finish time {{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}] - {{ hospedate_environment }} - BUCKET SYNC FINISH  from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
+
