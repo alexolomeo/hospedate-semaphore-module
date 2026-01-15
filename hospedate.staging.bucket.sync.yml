@@ -1,6 +1,7 @@
 ---
 - name: hospedate staging bucket sync
   hosts: semaphore_server
+  gather_facts: yes
   vars:
     hospedate_group_security: hospedate
   roles:
