@@ -43,11 +43,11 @@
     mode: '0644'
 
 - name: "Get timestamp to stimate duration"
-  shell: "date +%Y-%m-%dT%H:%M:%S"
+  shell: "date +%H:%M:%S"
   register: duration
 
 - name: "BUCKET - Bucket history log finish sync"
   become: yes
-  ansible.builtin.shell: echo "[ duration {{ duration.stdout | to_datetime('%Y-%m-%dT%H:%M:%S')).strftime('%H:%M') }} ] - {{ hospedate_environment }} - FINISH SYNC from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
+  ansible.builtin.shell: echo "[ duration {{ duration.stdout }} ] - {{ hospedate_environment }} - FINISH SYNC from {{ hospedate_bucket_origin }}  to {{ hospedate_bucket_target }} " >> {{ hospedate_logdir }}/bucket-sync.log
 
 
