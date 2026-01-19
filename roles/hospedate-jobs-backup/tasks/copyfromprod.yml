@@ -18,9 +18,8 @@
        my_date: "{{ tstamp.stdout[0:8]}}"
        my_time: "{{ tstamp.stdout[8:]}}"
 
-    - name: "COPY FROM PROD - Base folder to AWX exists: {{ hospedate_local_workdir }}"
-      #become: yes
-      become_user: "{{ hospedate_user }}"
+    - name: "COPY FROM PROD - Base folder to Semaphore Server exists: {{ hospedate_local_workdir }}"
+      become: yes
       ansible.builtin.file:
         path: "{{ hospedate_local_base }}"
         state: directory
