@@ -11,7 +11,7 @@
       hospedate_mode: copyfromprod                   #backup, copyfromprod, restore, cleandb
       hospedate_project: hospedate                       # client
       hospedate_environment: staging             #integration, production
-      hospedate_service: "{{ service_stop }}"
+      hospedate_user: semaphore-user
       hospedate_db_remote_profile: "{{ db_remote_profile }}"
       hospedate_db_remote_host: hospedate-prod-db.c7icsiso6en4.us-east-2.rds.amazonaws.com 
       hospedate_db_remote_name: hospedate
