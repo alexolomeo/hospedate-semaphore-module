@@ -72,7 +72,7 @@
     - name: "COPY FROM PROD - Start get backup from production"
       become_user: "{{ hospedate_user }}"
       command: >
-        pg_dump  {{ hospedate_db_remote_profile }}  --host {{ hospedate_db_remote_host }}  --port {{ hospedate_db_remote_port }}  -U {{ hospedate_db_remote_username }} {{ hospedate_db_remote_exclude }}  -Fc  {{ hospedate_db_remote_name }} -f {{ hospedate_local_workdir }}/remote/{{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time }}.bkp
+        pg_dump  --host {{ hospedate_db_remote_host }}  --port {{ hospedate_db_remote_port }}  -U {{ hospedate_db_remote_username }} {{ hospedate_db_remote_exclude }}  -Fc  {{ hospedate_db_remote_name }} -f {{ hospedate_local_workdir }}/remote/{{ hospedate_db_remote_name }}-{{ my_date }}{{ my_time }}.bkp
       environment:
         PGPASSWORD: "{{ hospedate_db_remote_password }}"
       args:
