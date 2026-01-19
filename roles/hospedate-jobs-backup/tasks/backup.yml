@@ -21,8 +21,8 @@
       ansible.builtin.file:
         path: "{{ hospedate_local_workdir }}"
         state: directory
-        owner: "{{ hospedate_awx_user }}"
-        group: "{{ hospedate_awx_group }}"
+        owner: "{{ hospedate_user }}"
+        group: "{{ hospedate_group_security }}"
         mode: 0775
         force: yes
 
@@ -30,8 +30,17 @@
       ansible.builtin.file:
         path: "{{ hospedate_local_workdir }}/backup"
         state: directory
-        owner: "{{ hospedate_awx_user }}"
-        group: "{{ hospedate_awx_group }}"
+        owner: "{{ hospedate_user }}"
+        group: "{{ hospedate_group_security }}"
+        mode: 0775
+        force: yes
+
+    - name: "Backup On {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - Backup directory workdir exists: {{ hospedate_local_workdir }}/backup/{{ my_date }}"
+      ansible.builtin.file:
+        path: "{{ hospedate_local_workdir }}/backup/{{ my_date }}"
+        state: directory
+        owner: "{{ hospedate_user }}"
+        group: "{{ hospedate_group_security }}"
         mode: 0775
         force: yes
 
@@ -39,17 +48,46 @@
       ansible.builtin.file:
         path: "{{ hospedate_local_workdir }}/log"
         state: directory
-        owner: "{{ hospedate_awx_user }}"
-        group: "{{ hospedate_awx_group }}"
+        owner: "{{ hospedate_user }}"
+        group: "{{ hospedate_group_security }}"
         mode: 0775
         force: yes
 
     - name: "Backup on {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - Starting PGDUMP for backup"
-      become_user: "{{ hospedate_awx_user }}"
-      ansible.builtin.shell: "export PGPASSWORD={{ hospedate_db_local_password }} ; pg_dump -h {{ hospedate_db_local_host }} -U {{ hospedate_db_local_username }} {{ hospedate_db_local_exclude }}  -Fc {{ hospedate_db_local_name }} > {{ hospedate_db_local_name }}-{{ my_date }}{{ my_time }}.bkp "
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.command: > 
+        pg_dump -p {{ hospedate_db_local_port }} -h {{ hospedate_db_local_host }} -U {{ hospedate_db_local_username }} {{ hospedate_db_local_exclude }}  -Fc {{ hospedate_db_local_name }} -f {{ hospedate_db_local_name }}-{{ my_date }}{{ my_time }}-{{ hospedate_flat }}.bkp
+      environment:
+        PGPASSWORD: "{{ hospedate_db_local_password }}"
       args:
-        chdir: "{{ hospedate_local_workdir }}/backup"
+        chdir: "{{ hospedate_local_workdir }}/backup/{{ my_date }}/"
 
     - name: "Backup On {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - Finish backup "
-      become_user: "{{ hospedate_awx_user }}"
-      ansible.builtin.shell: "echo '{{ my_date }}{{ my_time }} [BACKUP] Creating backup {{ hospedate_local_workdir }}/backup/{{ hospedate_db_local_name }}-{{ my_date }}{{ my_time}}.bkp from the database {{ hospedate_db_local_name }}' >> {{ hospedate_local_workdir }}/log/backup.log"
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.command: > 
+        echo '{{ my_date }}{{ my_time }} [BACKUP] Creating backup {{ hospedate_local_workdir }}/backup/{{ my_date }}/{{ hospedate_db_local_name }}-{{ my_date }}{{ my_time}}.bkp from the database {{ hospedate_db_local_name }}' >> {{ hospedate_local_workdir }}/log/backup.log
+
+#    - name: "Backup on {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - remove backup file for retention day"
+#      become_user: "{{ hospedate_user }}"
+#      ansible.builtin.shell: "find $BACKUP_PATH -type f -prune -mtime +$BACKUP_RETENTION -exec rm -f {} \;" 
+#      args:
+#        chdir: "{{ hospedate_local_workdir }}/backup"
+
+- block:
+
+    - name: "Backup on {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - Starting UPLOAD BUCKET  for backup"
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.shell: "aws s3 cp  {{ hospedate_local_workdir }}/backup/{{ my_date}}/{{ hospedate_db_local_name }}-{{ my_date }}{{ my_time }}-{{ hospedate_flat }}.bkp  {{ hospedate_bucket_target }}/{{ my_date }}/"
+      args:
+        chdir: "{{ hospedate_local_workdir }}/backup/{{ my_date }}/"
+      register: hospedate_list_backup_read
+
+    - name: "Backup on {{ hospedate_project|upper }} {{ hospedate_environment|upper }} - Share Public BUCKET  for Download"
+      become_user: "{{ hospedate_user }}"
+      ansible.builtin.shell: "aws s3 ls {{ hospedate_bucket_target }}/{{ my_date }}/{{ hospedate_db_local_name }}-{{ my_date }}{{ my_time }}-{{ hospedate_flat }}.bkp "
+
+    - name: BACKUP LIST PACKAGE - Print return information from the previous task
+      ansible.builtin.debug:
+        var: hospedate_list_backup_read.stdout_lines
+
+  when: hospedate_bucket_activate == true and hospedate_bucket_provider == 's3'

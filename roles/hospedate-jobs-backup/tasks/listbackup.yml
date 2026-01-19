@@ -1,14 +1,25 @@
 ---
-  
-- name: "LIST BACKUP - list  from backup ."
+
+- name: "LIST BACKUP - list  from backup Amazon S3"
   block:
 
     - name: "BACKUP LIST PACKAGE - List to  backup files "
-      become: yes
-      ansible.builtin.shell: "ls {{ hospedate_local_workdir }}/backup | sort -k {{ hospedate_limit }} "
-      register: hospedate_list_backup_read
+      become_user: "{{ gazella_awx_user }}"
+      ansible.builtin.shell: "aws s3 ls --recursive  {{ gazella_bucket_target }}  | grep {{ gazella_filter }} | tail -{{ gazella_limit }} "
+      register: gazella_list_backup_read
 
     - name: BACKUP LIST PACKAGE - Print return information from the previous task
       ansible.builtin.debug:
-        var: hospedate_list_backup_read.stdout_lines
-        verbosity: 2
+        var: gazella_list_backup_read.stdout_lines
+
+    - name: "BACKUP LIST Encrypt - List to  backup files "
+      become_user: "{{ gazella_awx_user }}"
+      ansible.builtin.shell: "mc share list download  | grep Share: | grep {{ gazella_filter }} |  sort -k2 -n | tail -{{ gazella_limit }} "
+      register: gazella_list_backup_download_read
+
+    - name: BACKUP LIST Download - Print Line
+      ansible.builtin.debug:
+        var: gazella_list_backup_download_read.stdout_lines
+
+  when: gazella_bucket_activate == true and gazella_bucket_provider == 'minio'
+
