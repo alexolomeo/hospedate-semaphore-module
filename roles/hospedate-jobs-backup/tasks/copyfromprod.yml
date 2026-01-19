@@ -59,7 +59,7 @@
         force: yes
 
     - name: COPY FROM PROD - Install - Copy the hoospedate-restore script
-      #become_user: "{{ hospedate_user }}"
+      become_user: "{{ hospedate_user }}"
       ansible.builtin.template:
         src: hospedate-restore.j2
         dest: "{{ hospedate_local_workdir }}/bin/hospedate-restore"
